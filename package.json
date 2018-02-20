@@ -1,0 +1,52 @@
+{
+  "name": "hypergen",
+  "version": "0.1.0",
+  "description": "simplifies creation of hygen templates from existing projects",
+  "main": "hypergen.js",
+  "author": "Ron Perry <ronp001@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "hypergen": "./bin/hypergen"
+  },
+  "repository" : { 
+    "type" : "git",
+    "url" : "https://github.com/ronp001/hypergen"
+  },
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "relink": "yarn unlink && yarn link",
+    "build": "tsc",
+    "test:watch": "jest --watch",
+    "doc": "typedoc --out ./doc ./src"
+  },
+  "dependencies": {
+    "chalk": "^2.3.1",
+    "commander": "^2.14.1",
+    "inquirer": "^5.1.0",
+    "lodash": "^4.17.5"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^0.0.36",
+    "@types/jest": "^22.1.2",
+    "@types/lodash": "^4.14.104",
+    "@types/mock-fs": "^3.6.30",
+    "jest": "^22.3.0",
+    "mock-fs": "^4.4.2",
+    "ts-jest": "^22.0.4",
+    "typescript": "^2.7.2"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "src(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

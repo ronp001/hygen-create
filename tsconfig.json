@@ -1,0 +1,13 @@
+{
+    "include": [ "./src/**/*.ts" ],
+    "exclude": [ "node_modules", "src/__tests__" ],
+    "compilerOptions": {
+        "outDir": "./dist",         /* Redirect output structure to the directory. */
+        "target": "es6",            /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
+        "module": "commonjs",       /* Specify module code generation: 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
+        "inlineSourceMap": true,
+        "moduleResolution": "node",
+        "declaration": true,       /* Generate corresponding '.d.ts' file? */
+        "strict": true
+    }
+}

@@ -1,0 +1,9 @@
+node_modules/
+src/
+docs/
+src/__tests__/
+hypergen.json
+.gitignore
+.travis.yml
+tsconfig.json
+example/

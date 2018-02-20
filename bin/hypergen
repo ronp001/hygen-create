@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+let HypergenCli = require('../dist/hypergen-cli.js').default
+let cli = new HypergenCli()
+cli.main()
