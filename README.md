@@ -181,45 +181,5 @@ $ hypergen --help
 ---
 
 
-<style>
-H,HIGH,M,MED { 
-    background-color: #eee; 
-    padding: 2px; margin-right: 2px;
-} 
-H::before,HIGH::before,M::before,MED:before {
-    font-weight: bold; 
-    margin-right: 5px; 
-    padding: 2px;
-    color: white
-}
-H::before,HIGH::before {
-    content: "HIGH PRIORITY"; 
-    background-color: red; 
-} 
-M::before,MED::before {
-    content: "MEDIUM PRIORITY"; 
-    background-color: green; 
-    font-weight: normal;
-    font-size: .85em
-}
-
-R {
-    border-radius: 4px;
-    background-color: #eee;
-    padding: 5px;
-    font-size: 1.2em;
-    color: red;
-    font-style: italic;
-}
-R.important::before {
-    content: "!";
-    color: white;
-    background-color: red;
-    border-radius: 25px;
-    padding-right: 7px;
-    padding-left: 5px;
-}
-</style>
-
 ## Copyright
 (C) 2018 Ron Perry. [MIT License](LICENSE.txt).
