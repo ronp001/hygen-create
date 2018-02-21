@@ -2,7 +2,7 @@
   "name": "hypergen",
   "version": "0.1.0",
   "description": "simplifies creation of hygen templates from existing projects",
-  "main": "hypergen.js",
+  "main": "dist/hypergen.js",
   "author": "Ron Perry <ronp001@gmail.com>",
   "license": "MIT",
   "bin": {
