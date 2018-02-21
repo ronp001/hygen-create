@@ -15,15 +15,18 @@ The resulting template files can be used as is (using the `hygen <generator> new
 
 ## Installation
 
-Install globally using yarn or npm:
+This is still work in progress, so not available on npm yet. 
+
+To work with this, clone the repository and run:
 
 ```
-$ npm -g hypergen
+$ cd hypergen
+$ yarn link
+$ yarn
 ```
-or
-```
-$ yarn global add hypergen
-```
+
+This should make the `hypergen` command available.
+
 
 ## Generating a generator
 

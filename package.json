@@ -8,9 +8,9 @@
   "bin": {
     "hypergen": "./bin/hypergen"
   },
-  "repository" : { 
-    "type" : "git",
-    "url" : "https://github.com/ronp001/hypergen"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronp001/hypergen"
   },
   "scripts": {
     "clean": "rm -rf dist/",
