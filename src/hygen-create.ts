@@ -4,32 +4,32 @@ import chalk from 'chalk'
 import * as fs from 'fs'
 import * as path from 'path'
 
-export class HypergenError extends Error {
+export class HygenCreateError extends Error {
     constructor(public msg: string) {super(msg)}
-    public get message() { return "hypergen - " + this.msg }
+    public get message() { return "hygen-create - " + this.msg }
 }
 
-export namespace HypergenError {
-    export class NoSessionInProgress extends HypergenError { constructor() { super("no hypergen session definitions file found ('hypergen start' to create one)")  } }
-    export class FromNameNotDefined extends HypergenError { constructor() { super("'name word' not specified (run 'hypergen usename' to set)")  } }
-    export class CantParseSessionFile extends HypergenError { constructor(file:string|null) { super(`can't parse session file - ${file}`)  } }
-    export class SessionInProgress extends HypergenError { constructor() { super("hypergen session already in progress")  } }
-    export class NothingToGenerate extends HypergenError { constructor() { super("nothing to generate")  } }
-    export class NoFilesAdded extends HypergenError { constructor() { super("no files added")  } }
-    export class TargetPathNotSet extends HypergenError { constructor() { super("target path for templates not set (use 'export HYPERGEN_TMPLS=')")  } }
-    export class NoSuchPath extends HypergenError { constructor(file:string|null) { super(`can't find path ${file}`)  } }
-    export class FileNotFound extends HypergenError { constructor(file:string|null) { super(`file not found: ${file}`)  } }
-    export class InvalidSessionFile extends HypergenError { constructor(file:string|null) { super(`invalid session file -- [${file}]`)  } }
-    export class InvalidSessionFileVersion extends HypergenError { constructor(file:string|null, version:number) { super(`invalid session file version (${version})-- ${file}`)  } }
-    export class TryingToStartSessionWithoutPath extends HypergenError { constructor() { super(`session can only be started after valid path is set`)  } }
-    export class AddedFileMustBeUnderBaseDir extends HypergenError { constructor(file:string, basedir: string) { super(`cannot add ${file} - not under base dir (${basedir})`) } }
+export namespace HygenCreateError {
+    export class NoSessionInProgress extends HygenCreateError { constructor() { super("no hygen-create session definitions file found ('hygen-create start' to create one)")  } }
+    export class FromNameNotDefined extends HygenCreateError { constructor() { super("'name word' not specified (run 'hygen-create usename' to set)")  } }
+    export class CantParseSessionFile extends HygenCreateError { constructor(file:string|null) { super(`can't parse session file - ${file}`)  } }
+    export class SessionInProgress extends HygenCreateError { constructor() { super("hygen-create session already in progress")  } }
+    export class NothingToGenerate extends HygenCreateError { constructor() { super("nothing to generate")  } }
+    export class NoFilesAdded extends HygenCreateError { constructor() { super("no files added")  } }
+    export class TargetPathNotSet extends HygenCreateError { constructor() { super("target path for templates not set (use 'export HYGEN_CREATE_TMPLS=')")  } }
+    export class NoSuchPath extends HygenCreateError { constructor(file:string|null) { super(`can't find path ${file}`)  } }
+    export class FileNotFound extends HygenCreateError { constructor(file:string|null) { super(`file not found: ${file}`)  } }
+    export class InvalidSessionFile extends HygenCreateError { constructor(file:string|null) { super(`invalid session file -- [${file}]`)  } }
+    export class InvalidSessionFileVersion extends HygenCreateError { constructor(file:string|null, version:number) { super(`invalid session file version (${version})-- ${file}`)  } }
+    export class TryingToStartSessionWithoutPath extends HygenCreateError { constructor() { super(`session can only be started after valid path is set`)  } }
+    export class AddedFileMustBeUnderBaseDir extends HygenCreateError { constructor(file:string, basedir: string) { super(`cannot add ${file} - not under base dir (${basedir})`) } }
 }
 
 export interface FilesHash { [key: string] : boolean }
 
-export class HypergenSession {
-    about: string = "This is a hypergen definitions file. The hypergen utility creates generators that can be executed using hygen."
-    hypergen_version: string = "0.1.0"
+export class HygenCreateSession {
+    about: string = "This is a hygen-create definitions file. The hygen-create utility creates generators that can be executed using hygen."
+    hygen_create_version: string = "0.1.0"
     name: string = ""
     files_and_dirs: FilesHash = {}
     templatize_using_name: string | null = null
@@ -51,17 +51,17 @@ export interface FileInfo {
 }
 
 
-export class Hypergen {
+export class HygenCreate {
 
-    public session : HypergenSession | null = null
-    public static default_session_file_name : string = "hypergen.json"
-    public session_file_name : string = Hypergen.default_session_file_name
+    public session : HygenCreateSession | null = null
+    public static default_session_file_name : string = "hygen-create.json"
+    public session_file_name : string = HygenCreate.default_session_file_name
     private session_file_path : AbsPath = new AbsPath(null)
     private session_base_dir : AbsPath = new AbsPath(null)
     private orig_session_json : string = ""  // used to check if the state was changed and needs saving
 
     public get targetDirForGenerators() : AbsPath {
-        return new AbsPath(process.env.HYPERGEN_TMPLS)
+        return new AbsPath(process.env.HYGEN_CREATE_TMPLS)
     }
     public get targetDirForGenerator() : AbsPath {
         if ( this.session == null ) return new AbsPath(null)
@@ -106,20 +106,20 @@ export class Hypergen {
     }
     
     /**
-     * binds the Hypergen instance to a specific path.
+     * binds the HygenCreate instance to a specific path.
      * if a session already exists for this path (i.e., a session file exists in this directory or in one
      * of its ancestors) loads the session. the location of the session file marks the topmost directory 
      * in the interactive session.
      * 
      * @param for_path: <directory | file>
      * 
-     *                  if directory: indicates where to start looking for the hypergen session file.  
+     *                  if directory: indicates where to start looking for the hygen-create session file.  
      *                  if no session file found this is where a new one should be created if necessary
      * 
      *                  if file: path to a session file
      */
     public setPathAndLoadSessionIfExists(for_path: string) : boolean {
-        this.debug("Hypergen starting:", for_path)
+        this.debug("HygenCreate starting:", for_path)
         
         let p = new AbsPath(for_path)
 
@@ -134,33 +134,33 @@ export class Hypergen {
             // load the session file
             let sessionfile_contents : any = p.contentsFromJSON
             if ( sessionfile_contents == null ) {
-                throw new HypergenError.CantParseSessionFile(p.abspath)
+                throw new HygenCreateError.CantParseSessionFile(p.abspath)
             }
 
             // verify the structure
-            let versionstr = sessionfile_contents['hypergen_version']
-            if (!versionstr || !versionstr.split) throw new HypergenError.InvalidSessionFile(p.abspath)
-            let version = sessionfile_contents['hypergen_version'].split('.').map((n:string) => {return parseInt(n)})
+            let versionstr = sessionfile_contents['hygen_create_version']
+            if (!versionstr || !versionstr.split) throw new HygenCreateError.InvalidSessionFile(p.abspath)
+            let version = sessionfile_contents['hygen_create_version'].split('.').map((n:string) => {return parseInt(n)})
             
             if ( isNaN(version[0]) || isNaN(version[1]) || isNaN(version[2]) ) {
                 if ( this.debugOn ) {
-                    console.log("hypergen_version", sessionfile_contents['hypergen_version'])
+                    console.log("hygen_create_version", sessionfile_contents['hygen_create_version'])
                     console.log("version", version)
                     console.log("sessionfile contents", sessionfile_contents)
                 }
-                throw new HypergenError.InvalidSessionFile(p.abspath)
+                throw new HygenCreateError.InvalidSessionFile(p.abspath)
             }
             if ( version[0] > 0 || version[1] > 1 ) {
-                throw new HypergenError.InvalidSessionFileVersion(p.abspath, version)
+                throw new HygenCreateError.InvalidSessionFileVersion(p.abspath, version)
             }
 
             // convert arrays to hashes if necessary
             if(sessionfile_contents.files_and_dirs instanceof Array) {
-                sessionfile_contents.files_and_dirs = HypergenSession.arrayToFilesHash(sessionfile_contents.files_and_dirs)
+                sessionfile_contents.files_and_dirs = HygenCreateSession.arrayToFilesHash(sessionfile_contents.files_and_dirs)
             }
                         
             // create the session object
-            this.session = Object.assign(new HypergenSession, sessionfile_contents)
+            this.session = Object.assign(new HygenCreateSession, sessionfile_contents)
             this.session_file_path = p
             this.session_base_dir = p.parent
             this.orig_session_json = JSON.stringify(this.session)
@@ -170,7 +170,7 @@ export class Hypergen {
             this.session_file_path = this.session_base_dir.add(this.session_file_name)
             return false
         } else {
-            throw new HypergenError.NoSuchPath(p.abspath)
+            throw new HygenCreateError.NoSuchPath(p.abspath)
         }
     }
 
@@ -211,15 +211,15 @@ export class Hypergen {
      * throws error if another session is already in progress
      */
     public startSession(name: string) {
-        if ( this.session != null ) throw new HypergenError.SessionInProgress
-        if ( !this.session_base_dir.isDir ) throw new HypergenError.TryingToStartSessionWithoutPath
-        this.session = new HypergenSession
+        if ( this.session != null ) throw new HygenCreateError.SessionInProgress
+        if ( !this.session_base_dir.isDir ) throw new HygenCreateError.TryingToStartSessionWithoutPath
+        this.session = new HygenCreateSession
         this.session.name = name
         this.session.files_and_dirs[this.session_file_name] = true
     }
     
     public renameSession(name: string) {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         this.session.name = name
     }
 
@@ -227,7 +227,7 @@ export class Hypergen {
      * cancel the current session and delete the session file
      */
     public abort() {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         this.session = null
         if ( this.session_file_path.isFile ) {
             this.session_file_path.rmFile()
@@ -235,18 +235,18 @@ export class Hypergen {
     }
     
     public add(files_and_dirs: string[], recursive : boolean = false, in_subdir : boolean = false) {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
-        if ( this.session_base_dir == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        if ( this.session_base_dir == null ) throw new HygenCreateError.NoSessionInProgress
         
         for ( let file of files_and_dirs ) {
             let p = AbsPath.fromStringAllowingRelative(file)
             if ( !p.exists ) {
-                throw new HypergenError.FileNotFound(p.toString())
+                throw new HygenCreateError.FileNotFound(p.toString())
             }
 
             let relpath = p.relativeTo(this.session_base_dir, true)
             if ( relpath == null ) {
-                throw new HypergenError.AddedFileMustBeUnderBaseDir(p.toString(), this.session_base_dir.toString())
+                throw new HygenCreateError.AddedFileMustBeUnderBaseDir(p.toString(), this.session_base_dir.toString())
             }
             if ( p.isFile || p.isSymLink ) {
                 if ( this.session.files_and_dirs[relpath] ) { 
@@ -275,15 +275,15 @@ export class Hypergen {
     }
 
     public remove(files: string[]) {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
-        if ( this.session_base_dir == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        if ( this.session_base_dir == null ) throw new HygenCreateError.NoSessionInProgress
         
         for ( let file of files ) {
             let p = AbsPath.fromStringAllowingRelative(file)
     
             let relpath = p.relativeTo(this.session_base_dir, true)
             if ( relpath == null ) {
-                throw new HypergenError.AddedFileMustBeUnderBaseDir(p.toString(), this.session_base_dir.toString())
+                throw new HygenCreateError.AddedFileMustBeUnderBaseDir(p.toString(), this.session_base_dir.toString())
             }
             if ( this.session.files_and_dirs[relpath] == true ) {
                 this.output("removing from generator:", relpath)
@@ -301,7 +301,7 @@ export class Hypergen {
      * @returns word that is converted into this param, or null if param is not defined
      */
     public getWordConversion(word:string) : string | null {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
 
         return this.session.templatize_using_name
     }
@@ -313,7 +313,7 @@ export class Hypergen {
      * @returns information about the would-be generated templates
      */
     public getTemplatesUsingName(from_name:string) : Array<TemplateInfo> {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         let result = []
         
         for ( let file in this.session.files_and_dirs) {
@@ -331,10 +331,10 @@ export class Hypergen {
      * @param using_name word to use for templatization of the <%= name %> variable
      */
     public getTemplate(relpath: string, using_name: string | null) : TemplateInfo {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
 
         if ( using_name == null ) {
-            if ( this.session.templatize_using_name == null ) throw new HypergenError.FromNameNotDefined
+            if ( this.session.templatize_using_name == null ) throw new HygenCreateError.FromNameNotDefined
             using_name = this.session.templatize_using_name
         }
         let abspath = this.fileAbsPathFromRelPath(relpath)    
@@ -343,14 +343,14 @@ export class Hypergen {
     }
 
     public get templates() : Array<TemplateInfo> {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
-        if ( this.session.templatize_using_name == null ) throw new HypergenError.FromNameNotDefined
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        if ( this.session.templatize_using_name == null ) throw new HygenCreateError.FromNameNotDefined
 
         return this.getTemplatesUsingName(this.session.templatize_using_name)
     }
 
     public useName(name:string) {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
 
         if ( this.session.templatize_using_name == name ) {
             this.output(`already using '${name}' to templatize files`)
@@ -378,8 +378,8 @@ export class Hypergen {
     }
 
     public getFileInfo(files:string[], verbose:boolean|undefined) : Array<FileInfo> {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
-        if ( this.session_base_dir == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        if ( this.session_base_dir == null ) throw new HygenCreateError.NoSessionInProgress
         
         let result : Array<FileInfo> = []
 
@@ -416,9 +416,9 @@ export class Hypergen {
     }
 
     public generate(force:boolean = false) {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
-        if ( this.fileCount == 0 ) throw new HypergenError.NothingToGenerate  
-        if ( !this.targetDirForGenerator.isSet ) throw new HypergenError.TargetPathNotSet
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        if ( this.fileCount == 0 ) throw new HygenCreateError.NothingToGenerate  
+        if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet
         
         this.output("target path: ", this.targetDirForGenerators.toString())
         
@@ -430,8 +430,8 @@ export class Hypergen {
     }
     
     public generateTemplateForFile(relpath: string, force: boolean = false) {
-        if ( this.session == null ) throw new HypergenError.NoSessionInProgress
-        if ( !this.targetDirForGenerator.isSet ) throw new HypergenError.TargetPathNotSet
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet
 
         let input_file = this.fileAbsPathFromRelPath(relpath)
 

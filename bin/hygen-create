@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+let HygenCreateCli = require('../dist/hygen-create-cli.js').default
+let cli = new HygenCreateCli()
+cli.main()

@@ -2,7 +2,7 @@ node_modules/
 src/
 docs/
 src/__tests__/
-hypergen.json
+hygen-create.json
 .gitignore
 .travis.yml
 tsconfig.json

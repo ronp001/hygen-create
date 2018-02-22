@@ -1,57 +1,57 @@
 import { AbsPath } from './path_helper';
 import { TemplateInfo } from './templatizer';
-export declare class HypergenError extends Error {
+export declare class HygenCreateError extends Error {
     msg: string;
     constructor(msg: string);
     readonly message: string;
 }
-export declare namespace HypergenError {
-    class NoSessionInProgress extends HypergenError {
+export declare namespace HygenCreateError {
+    class NoSessionInProgress extends HygenCreateError {
         constructor();
     }
-    class FromNameNotDefined extends HypergenError {
+    class FromNameNotDefined extends HygenCreateError {
         constructor();
     }
-    class CantParseSessionFile extends HypergenError {
+    class CantParseSessionFile extends HygenCreateError {
         constructor(file: string | null);
     }
-    class SessionInProgress extends HypergenError {
+    class SessionInProgress extends HygenCreateError {
         constructor();
     }
-    class NothingToGenerate extends HypergenError {
+    class NothingToGenerate extends HygenCreateError {
         constructor();
     }
-    class NoFilesAdded extends HypergenError {
+    class NoFilesAdded extends HygenCreateError {
         constructor();
     }
-    class TargetPathNotSet extends HypergenError {
+    class TargetPathNotSet extends HygenCreateError {
         constructor();
     }
-    class NoSuchPath extends HypergenError {
+    class NoSuchPath extends HygenCreateError {
         constructor(file: string | null);
     }
-    class FileNotFound extends HypergenError {
+    class FileNotFound extends HygenCreateError {
         constructor(file: string | null);
     }
-    class InvalidSessionFile extends HypergenError {
+    class InvalidSessionFile extends HygenCreateError {
         constructor(file: string | null);
     }
-    class InvalidSessionFileVersion extends HypergenError {
+    class InvalidSessionFileVersion extends HygenCreateError {
         constructor(file: string | null, version: number);
     }
-    class TryingToStartSessionWithoutPath extends HypergenError {
+    class TryingToStartSessionWithoutPath extends HygenCreateError {
         constructor();
     }
-    class AddedFileMustBeUnderBaseDir extends HypergenError {
+    class AddedFileMustBeUnderBaseDir extends HygenCreateError {
         constructor(file: string, basedir: string);
     }
 }
 export interface FilesHash {
     [key: string]: boolean;
 }
-export declare class HypergenSession {
+export declare class HygenCreateSession {
     about: string;
-    hypergen_version: string;
+    hygen_create_version: string;
     name: string;
     files_and_dirs: FilesHash;
     templatize_using_name: string | null;
@@ -63,8 +63,8 @@ export interface FileInfo {
     included: boolean;
     found: boolean;
 }
-export declare class Hypergen {
-    session: HypergenSession | null;
+export declare class HygenCreate {
+    session: HygenCreateSession | null;
     static default_session_file_name: string;
     session_file_name: string;
     private session_file_path;
@@ -88,14 +88,14 @@ export declare class Hypergen {
     outputFunc: (...args: any[]) => void;
     debugFunc: (...args: any[]) => void;
     /**
-     * binds the Hypergen instance to a specific path.
+     * binds the HygenCreate instance to a specific path.
      * if a session already exists for this path (i.e., a session file exists in this directory or in one
      * of its ancestors) loads the session. the location of the session file marks the topmost directory
      * in the interactive session.
      *
      * @param for_path: <directory | file>
      *
-     *                  if directory: indicates where to start looking for the hypergen session file.
+     *                  if directory: indicates where to start looking for the hygen-create session file.
      *                  if no session file found this is where a new one should be created if necessary
      *
      *                  if file: path to a session file

@@ -1,16 +1,16 @@
 {
-  "name": "hypergen",
+  "name": "hygen-create",
   "version": "0.1.0",
   "description": "simplifies creation of hygen templates from existing projects",
-  "main": "dist/hypergen.js",
+  "main": "dist/hygen-create.js",
   "author": "Ron Perry <ronp001@gmail.com>",
   "license": "MIT",
   "bin": {
-    "hypergen": "./bin/hypergen"
+    "hygen-create": "./bin/hygen-create"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ronp001/hypergen"
+    "url": "https://github.com/ronp001/hygen-create"
   },
   "scripts": {
     "clean": "rm -rf dist/",

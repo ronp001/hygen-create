@@ -1,6 +1,6 @@
 import { CliApp } from "./cli-app";
-export default class HypergenCli extends CliApp {
-    private hpg;
+export default class HygenCreateCli extends CliApp {
+    private hgc;
     protected beforeCommand(): void;
     protected afterCommand(): void;
     protected _init(): void;

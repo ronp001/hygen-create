@@ -1,0 +1,30 @@
+{
+  "about": "definitions for turning this project into a reusable template using hygen-create",
+  "hygen_create_version": "0.1.0",
+  "name": "hyper",
+  "files_and_dirs": {
+    ".gitignore": true,
+    "package.json": true,
+    "tsconfig.json": true,
+    "src/cli-app.ts": true,
+    "src/hygen-create-cli.ts": true,
+    "src/hygen-create.ts": true,
+    "src/path_helper.ts": true,
+    "bin/hygen-create": true,
+    "src/__tests__/hygen-create.test.ts": true,
+    "src/__tests__/path_helper.test.ts": true,
+    "src/__tests__/templatizer.test.ts": true,
+    "src/templatizer.ts": true,
+    "hygen-create.json": true,
+    "LICENSE.txt": true,
+    "README.md": true,
+    "example/dist/hello.js": true,
+    "example/example_status.png": true,
+    "example/package.json": true,
+    ".npmignore": true,
+    ".travis.yml": true
+  },
+  "templatize_using_name": "hygen-create",
+  "using_name": "ledger",
+  "word_conversions": {}
+}

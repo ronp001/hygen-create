@@ -1,4 +1,4 @@
 doc/
 node_modules/
 package/
-hypergen*.tgz
+hygen_create*.tgz

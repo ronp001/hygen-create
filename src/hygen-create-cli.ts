@@ -4,33 +4,33 @@ import * as fs from "fs"
 import * as _ from "lodash"
 import chalk from 'chalk'
 import {CliApp} from "./cli-app"
-import {Hypergen,HypergenError} from './hypergen'
+import {HygenCreate,HygenCreateError} from './hygen-create'
 import {TemplateInfo} from './templatizer'
 
-export default class HypergenCli extends CliApp {
+export default class HygenCreateCli extends CliApp {
     
-    private hpg : Hypergen = new Hypergen();
+    private hgc : HygenCreate = new HygenCreate();
 
     protected beforeCommand() {
         
         if ( program.verbose ) {
             // console.log("beforeCommand - project:", program.project)
             // this.hpg.activateDebug()
-            this.hpg.outputFunc = console.log
+            this.hgc.outputFunc = console.log
         }
 
-        this.hpg.setPathAndLoadSessionIfExists(process.cwd())
+        this.hgc.setPathAndLoadSessionIfExists(process.cwd())
     }
 
     protected afterCommand() {
         // this.hpg.outputFunc("afterCommand")
-        this.hpg.saveSessionIfActiveAndChanged()
+        this.hgc.saveSessionIfActiveAndChanged()
     }
 
     protected _init() {
 
         program
-        .description('hypergen - create hygen templates from an existing project')
+        .description('hygen-create - create hygen templates from an existing project')
         .version('0.1.0')
         .option('-v, --verbose', "provide more info")
         // .option('-p, --project <path>', "path to project file (default: scan up from current dir)")
@@ -88,25 +88,25 @@ export default class HypergenCli extends CliApp {
     }
 
     private start(name: string, options:any) {
-        this.hpg.startSession(name)
-        console.log("created " + this.hpg.session_file_name)
+        this.hgc.startSession(name)
+        console.log("created " + this.hgc.session_file_name)
         if ( options.usename ) {
-            this.hpg.useName(options.usename)
+            this.hgc.useName(options.usename)
         }
     }
 
     private rename(name: string) {
-        this.hpg.renameSession(name)
+        this.hgc.renameSession(name)
     }
 
     private add(fileOrDir:string, otherFilesOrDirs:string[]) {
         let allfiles = this.fix(fileOrDir, otherFilesOrDirs)
-        this.hpg.add(allfiles)
+        this.hgc.add(allfiles)
     }
 
     private remove(fileOrDir:string, otherFilesOrDirs:string[]) {
         let allfiles = this.fix(fileOrDir, otherFilesOrDirs)
-        this.hpg.remove(allfiles)
+        this.hgc.remove(allfiles)
     }
 
     private printTemplateInfo(tinfo: TemplateInfo) {        
@@ -196,8 +196,8 @@ export default class HypergenCli extends CliApp {
     }
 
     private usename(name:string) {
-        this.hpg.useName(name)
-        let tinfos = this.hpg.templates
+        this.hgc.useName(name)
+        let tinfos = this.hgc.templates
         
         let count = 0
         for(let tinfo of tinfos) {
@@ -209,19 +209,19 @@ export default class HypergenCli extends CliApp {
     }
 
     private show(fileOrDir:string|undefined, otherFilesOrDirs:string[]|undefined) {
-        if ( this.hpg.session == null ) throw new HypergenError.NoSessionInProgress
+        if ( this.hgc.session == null ) throw new HygenCreateError.NoSessionInProgress
 
         let single = ( fileOrDir != undefined ) 
 
         let allfiles = this.fix(fileOrDir, otherFilesOrDirs)
-        let info = this.hpg.getFileInfo(allfiles, program.verbose)
+        let info = this.hgc.getFileInfo(allfiles, program.verbose)
 
         
-        if ( this.hpg.session.templatize_using_name ) {
-            console.log(chalk`\nUsing the string "{bold ${this.hpg.session.templatize_using_name}}" to templatize files (Change using 'hypergen usename <name>')`)
+        if ( this.hgc.session.templatize_using_name ) {
+            console.log(chalk`\nUsing the string "{bold ${this.hgc.session.templatize_using_name}}" to templatize files (Change using 'hygen-create usename <name>')`)
         } else {
             console.log("")
-            console.log(chalk.redBright(`\nNo word set for templatizging files.  Set using 'hypergen usename <name>'`))
+            console.log(chalk.redBright(`\nNo word set for templatizging files.  Set using 'hygen-create usename <name>'`))
             console.log("")
         }
 
@@ -264,8 +264,8 @@ export default class HypergenCli extends CliApp {
                     color = chalk.cyan
                 }
 
-                if ( this.hpg.session.templatize_using_name ) {
-                    tinfo = this.hpg.getTemplate(f, null)
+                if ( this.hgc.session.templatize_using_name ) {
+                    tinfo = this.hgc.getTemplate(f, null)
                     num_replacement_lines = tinfo.numReplacementLines
                 }
             }
@@ -289,16 +289,16 @@ export default class HypergenCli extends CliApp {
         
         if ( !single ) {
             console.log("")
-            if ( this.hpg.session.name ) {
-                if ( this.hpg.targetDirForGenerators.isSet ) {
-                    console.log(chalk.green(`Target dir: ${this.hpg.targetDirForGenerators.add(this.hpg.session.name).abspath}`) +  
-                                            (program.verbose ? chalk.gray(`  HYPERGEN_TMPLS=${this.hpg.targetDirForGenerators.abspath}`) : "") 
+            if ( this.hgc.session.name ) {
+                if ( this.hgc.targetDirForGenerators.isSet ) {
+                    console.log(chalk.green(`Target dir: ${this.hgc.targetDirForGenerators.add(this.hgc.session.name).abspath}`) +  
+                                            (program.verbose ? chalk.gray(`  HYGEN_CREATE_TMPLS=${this.hgc.targetDirForGenerators.abspath}`) : "") 
                                         )
                 } else {
-                    console.log(chalk.red("Target template dir not set (export HYPERGEN_TMPLS= to set it)"))
+                    console.log(chalk.red("Target template dir not set (export HYGEN_CREATE_TMPLS= to set it)"))
                 }
             } else {
-                console.log(chalk.red("Generator name not set (use hypergen rename <name> to set it)"))
+                console.log(chalk.red("Generator name not set (use hygen-create rename <name> to set it)"))
             }    
             console.log("")
         }
@@ -308,7 +308,7 @@ export default class HypergenCli extends CliApp {
     private generate(options:any) {
         let force : boolean = !!options.force
         // if ( force ) console.log("FORCE!")
-        this.hpg.generate(force)
+        this.hgc.generate(force)
     }
     private inquire() {
         inquirer.prompt([
