@@ -259,4 +259,43 @@ export class AbsPath {
         }
         return result
     }
+
+    public foreachEntryInDir(fn:(entry:AbsPath,traversal_direction:"down"|"up"|null) => void) {
+        let entries = this.dirContents
+        if ( entries == null ) return
+
+        for ( let entry of entries ) {
+            if ( entry.isDir ) {
+                fn(entry, "down")
+                entry.foreachEntryInDir(fn)
+                fn(entry, "up")
+            } else {
+                fn(entry, null)
+            }
+        }
+    }
+
+    public rmrfdir(must_match:RegExp, remove_self:boolean=false) {
+        if ( this.abspath == null ) return
+        if ( !this.isDir ) return
+        if ( remove_self && !this.abspath.match(must_match) ) {
+            throw new Error(`${this.abspath} does not match ${must_match} - aborting delete operation`)
+        }
+        this.foreachEntryInDir((p:AbsPath, direction:"down"|"up"|null) => {
+            if ( p.abspath == null) return
+            if ( !p.abspath.match(must_match) ) {
+                throw new Error(`${p.abspath} does not match ${must_match} - aborting delete operation`)
+            }
+            if ( direction == "up" || direction == null) {
+                if ( p.isDir ) {
+                    fs.rmdirSync(p.abspath)
+                } else {
+                    fs.unlinkSync(p.abspath)
+                }
+            }
+        })
+        if ( remove_self ) {
+            fs.rmdirSync(this.abspath)
+        }
+    }
 }

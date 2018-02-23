@@ -50,6 +50,23 @@ test('cwd-related mocks are working as documented', () => {
     expect(AbsPath.fromStringAllowingRelative().isDir).toBeTruthy()
 })
 
+test.skip('traversal', () => {
+    let p = new AbsPath('/')
+    p.foreachEntryInDir((e:AbsPath, direction:"down"|"up"|null) => {
+        console.log(e.toString(), direction)
+    })
+})
+
+test('rmrfdir', () => {
+    let p = new AbsPath('/base')
+    expect(p.exists).toBeTruthy()
+
+    expect(() => {p.rmrfdir(/not_base/, true)}).toThrow(/does not match/)
+    expect(() => {p.rmrfdir(/^\/base/, true)}).not.toThrow()
+    expect(p.exists).toBeFalsy()
+})
+
+
 test('node.js path functions are working as I think they do', () => {
     expect(path.normalize('/')).toEqual('/')
     expect(path.normalize('/..')).toEqual('/')

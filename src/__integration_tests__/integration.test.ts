@@ -2,32 +2,33 @@
 import {HygenCreate, HygenCreateError, HygenCreateSession} from "../hygen-create"
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
-import {MockFSHelper} from "./mock-fs-helper"
 import {AbsPath} from "../path_helper"
 // let runner = require('hygen')
 
 let path_to_example = new AbsPath(__dirname).findUpwards('example', true)
-let path_to_modules = new AbsPath(__dirname).findUpwards('node_modules', true)
-let simfs = new MockFSHelper().addSourceDirContents().addDirs([path_to_example, path_to_modules])
+let path_to_output = new AbsPath(__dirname).findUpwards('example_output', true)
+let path_to_templates = path_to_output.add('_templates')
+let path_to_generated = path_to_output.add('generated')
 
 beforeEach(async () => {   
-    simfs.fs_structure['/output'] = {}
-    mockfs(simfs.fs_structure)
-    process.env['HYGEN_CREATE_TMPLS'] = '/_templates'
-    process.env['HYGEN_TMPLS'] = '/_templates'
+    process.env['HYGEN_CREATE_TMPLS'] = path_to_templates.toString()
+    process.env['HYGEN_TMPLS'] = path_to_templates.toString()
+
+    path_to_generated.rmrfdir(/\/example_output\/generated\//, false)
+    path_to_templates.rmrfdir(/\/example_output\/_templates\//, false)
 })
   
 afterEach(async () => {
     mockfs.restore()
 })
 
-test('simple', () => {
-    expect(path_to_modules).not.toBeNull()
+test('simple', async () => {
 
     // create a generator using HygenCreate
     let hpg = new HygenCreate()
+    hpg.session_file_name = 'example_session.json'
     expect(hpg.setPathAndLoadSessionIfExists(path_to_example.toString())).toBeFalsy()
-    expect(() => {hpg.startSession('example')}).not.toThrow()
+    expect(() => {hpg.startSession('greeter')}).not.toThrow()
     expect(() => {hpg.add([path_to_example.add('package.json'), path_to_example.add('dist/hello.js')])}).not.toThrow()
 
     if ( hpg.session == null ) {
@@ -37,27 +38,24 @@ test('simple', () => {
         hpg.generate(false)
 
         // console.log(MockFSHelper.ls('/_templates', 7, ['*']))
-        expect(new AbsPath('/_templates/example/new/dist_hello.js.ejs.t').isFile).toBeTruthy()
-        expect(new AbsPath('/_templates/example/new/package.json.ejs.t').isFile).toBeTruthy()
+        expect(path_to_templates.add('greeter/new/dist_hello.js.ejs.t').isFile).toBeTruthy()
+        expect(path_to_templates.add('greeter/new/package.json.ejs.t').isFile).toBeTruthy()
     }
 
     function log(...args:any[]) {
-        args.unshift("***")
         console.log(args)
     }
 
     const { runner } = require('hygen')
     const { render } = require('../../node_modules/hygen/lib/render.js')
+    const execute = require('../../node_modules/hygen/lib/execute');
     const Logger = require('../test_support/hygen_logger')
 
-    // log("%%%%%")
-    // run the generator using Hygen
     const config = {
-        templates: '/_templates',
-        cwd: '/output',
+        templates: path_to_templates.toString(),
+        cwd: path_to_generated.toString(),
         debug: true,
-        exec: (action, body) => {
-            console.log("***** exec")
+        exec: (action:any, body:any) => {
           const opts = body && body.length > 0 ? { input: body } : {}
           return require('execa').shell(action, opts)
         },
@@ -65,10 +63,8 @@ test('simple', () => {
         logger: new Logger(log),
     }
 
-    console.log(MockFSHelper.ls('/', 7, ['?*']))
-    runner(['example', 'new'], config)
-    console.log(MockFSHelper.ls('/', 7, ['*']))
+    await runner(['greeter', 'new', '--name', 'hola'], config)
 
-    expect(new AbsPath('/output/generated').isDir).toBeTruthy()
-      // see if the generator created the expected files
+    // see if the generator created the expected files
+    expect(path_to_generated.add('hola/dist/hola.js').isFile).toBeTruthy()
 })

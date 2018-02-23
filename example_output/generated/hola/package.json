@@ -1,0 +1,8 @@
+{
+  "name": "hola",
+  "version": "1.0.0",
+  "description": "an application that prints 'Hola!'",
+  "scripts" : {
+    "hola": "node dist/hola.js"
+  }
+}
