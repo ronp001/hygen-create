@@ -1,4 +1,6 @@
 import * as _ from 'lodash'
+import * as inflection from 'inflection'
+
 import {AbsPath} from './path_helper'
 
 export interface ReplacementInfo {
@@ -58,13 +60,40 @@ export class TemplateInfo {
     }
 
     public replacer(to_word:string) {
-        return (match:string, p1_pfx:string, p2_words:string, p2a_lower:string, p2b_upper:string, offset:number, whole_string:string) => {
+        return (match:string, p1_pfx:string, p2_words:string, 
+                    p2a_exact:string,
+                    p2b_uppercased:string, 
+                    p2b_lowercased:string, 
+                    p2b_capitalized:string, 
+                    p2b_camelized:string, 
+                    p2b_camelized_lf:string, 
+                    p2b_underscored:string, 
+                    p2b_underscored_up:string, 
+                    p2b_dasherized:string, 
+                    p2b_titlized:string, 
+                offset:number, whole_string:string) => {
             let result : string 
 
-            if ( p2a_lower ) {
+            if ( p2a_exact ) {
                 result = to_word
-            } else if ( p2b_upper ) {
+            } else if ( p2b_uppercased ) {
+                result = `${to_word}.toUpperCase()`
+            } else if ( p2b_lowercased ) {
+                result = `${to_word}.toLowerCase()`
+            } else if ( p2b_capitalized ) {
                 result = `h.capitalize(${to_word})`
+            } else if ( p2b_camelized ) {
+                result = `h.inflection.camelize(${to_word}, false)`
+            } else if ( p2b_camelized_lf ) {
+                result = `h.inflection.camelize(${to_word}, true)`
+            } else if ( p2b_underscored ) {
+                result = `h.inflection.underscore(${to_word}, false)`
+            } else if ( p2b_underscored_up ) {
+                result = `h.inflection.underscore(${to_word}, false).toUpperCase()`
+            } else if ( p2b_dasherized ) {
+                result = `h.inflection.transform(${to_word}, ['underscore','dasherize'])`
+            } else if ( p2b_titlized ) {
+                result = `h.inflection.titlize(${to_word})`
             } else {
                 result = "?"
             }
@@ -74,7 +103,30 @@ export class TemplateInfo {
 
     public get regex() {
         let from_word = this.using_name
-        return new RegExp(`(^|[^a-zA-Z0-9])((${from_word})|(${_.capitalize(from_word)}))`,'g')
+ 
+        let uppercased = from_word.toUpperCase()
+        let lowercased = from_word.toLowerCase()
+        let capitalized = inflection.capitalize(from_word)
+        let camelized = inflection.camelize(from_word, false)
+        let camelized_lf = inflection.camelize(from_word, true)
+        let underscored = inflection.underscore(from_word, false)
+        let underscored_up = inflection.underscore(from_word, false).toUpperCase()
+        let dasherized = inflection.transform(from_word, ['underscore','dasherize'])
+        let titlized = inflection.titleize(from_word)
+
+        let combined = `(${from_word})`
+                    +  `|(${uppercased})`
+                    +  `|(${lowercased})`
+                    +  `|(${capitalized})`
+                    +  `|(${camelized})`
+                    +  `|(${camelized_lf})`
+                    +  `|(${underscored})`
+                    +  `|(${underscored_up})`
+                    +  `|(${dasherized})`
+                    +  `|(${titlized})`
+
+        return new RegExp(`(^|[^a-zA-Z0-9])(${combined})`,'g')
+        // return new RegExp(`(^|[^a-zA-Z0-9])((${from_word})|(${_.capitalize(from_word)}))`,'g')
     }
 
     public getProcessedText(text:string) : string | null {

@@ -8,6 +8,10 @@ import * as fs from 'fs'
 export class AbsPath {
     public readonly abspath : string | null
 
+    public get basename() : string {
+        if ( this.abspath == null ) return ""
+        return path.basename(this.abspath)
+    }
     /**
      * create an absolute path from a string
      * 
@@ -142,14 +146,18 @@ export class AbsPath {
         if (this.abspath == null ) return false;
         return this.add(filename).isFile
     }
+    public containsDir(filename: string) {
+        if (this.abspath == null ) return false;
+        return this.add(filename).isDir
+    }
     public get parent() : AbsPath {
         if (this.abspath == null) return this
         let parent_dir = path.dirname(this.abspath)
         return new AbsPath(parent_dir)
     }
-    public add(filepath: string) : AbsPath {
+    public add(filepath: string|AbsPath) : AbsPath {
         if ( this.abspath == null) return this
-        return new AbsPath(path.join(this.abspath, filepath))
+        return new AbsPath(path.join(this.abspath, filepath.toString()))
     }
     public static dirHierarchy(filepath: string) : Array<AbsPath> {
         return new AbsPath(filepath).dirHierarchy
@@ -168,9 +176,13 @@ export class AbsPath {
         return result
     }
 
-    public findUpwards(filename: string) : AbsPath {
+    public findUpwards(filename: string, can_be_dir: boolean = false) : AbsPath {
         for ( let dir of this.dirHierarchy ) {
-            if ( dir.containsFile(filename) ) return dir.add(filename);
+            if ( dir.containsFile(filename) ) {
+                return dir.add(filename);
+            } else if ( can_be_dir && dir.containsDir(filename)) {
+                return dir.add(filename);
+            }
         }
         return new AbsPath(null);
     }

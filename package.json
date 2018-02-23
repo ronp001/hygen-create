@@ -22,14 +22,17 @@
   "dependencies": {
     "chalk": "^2.3.1",
     "commander": "^2.14.1",
+    "inflection": "^1.12.0",
     "inquirer": "^5.1.0",
     "lodash": "^4.17.5"
   },
   "devDependencies": {
+    "@types/inflection": "^1.5.28",
     "@types/inquirer": "^0.0.36",
     "@types/jest": "^22.1.2",
     "@types/lodash": "^4.14.104",
     "@types/mock-fs": "^3.6.30",
+    "hygen": "^1.4.11",
     "jest": "^22.3.0",
     "mock-fs": "^4.4.2",
     "ts-jest": "^22.0.4",

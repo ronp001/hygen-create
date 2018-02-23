@@ -24,7 +24,7 @@
     ".npmignore": true,
     ".travis.yml": true
   },
-  "templatize_using_name": "hygen-create",
+  "templatize_using_name": "HygenCreate",
   "using_name": "ledger",
   "word_conversions": {}
 }

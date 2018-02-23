@@ -234,12 +234,12 @@ export class HygenCreate {
         }
     }
     
-    public add(files_and_dirs: string[], recursive : boolean = false, in_subdir : boolean = false) {
+    public add(files_and_dirs: string[]|AbsPath[], recursive : boolean = false, in_subdir : boolean = false) {
         if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         if ( this.session_base_dir == null ) throw new HygenCreateError.NoSessionInProgress
         
         for ( let file of files_and_dirs ) {
-            let p = AbsPath.fromStringAllowingRelative(file)
+            let p = AbsPath.fromStringAllowingRelative(file.toString())
             if ( !p.exists ) {
                 throw new HygenCreateError.FileNotFound(p.toString())
             }

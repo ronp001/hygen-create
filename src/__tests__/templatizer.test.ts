@@ -2,6 +2,7 @@
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as inflection from 'inflection'
 import {AbsPath} from "../path_helper"
 import { Templatizer, TemplateInfo } from '../templatizer';
 
@@ -112,4 +113,24 @@ test('simple', () => {
     expect(t.replacements[0].new_text).toMatch(/the word "<%= name %>" appears several times in this file/)
     expect(t.replacements[1].old_text).toMatch(/there is even a line in which the word Line appears multiple times/)
     expect(t.replacements[1].new_text).toMatch(/there is even a <%= name %> in which the word <%= h.capitalize\(name\) %> appears multiple times/)
+})
+
+test('inflections', () => {
+    expect(inflection.camelize('word_word')).toEqual('WordWord')
+    expect(inflection.transform('word-word', ['camelize'])).toEqual('Word-word')
+    expect(inflection.transform('word-word'.replace('-','_'), ['camelize'])).toEqual('WordWord')
+    expect(inflection.transform('word'.replace('-','_'), ['camelize'])).toEqual('Word')
+    expect(inflection.transform('Word'.replace('-','_'), ['camelize'])).toEqual('Word')
+    expect(inflection.transform('Word-Word'.replace('-','_'), ['classify'])).toEqual('WordWord')
+})
+
+test('with case changes', () => {
+    let str = "DoubleWord doubleWord double-word double_word DOUBLE_WORD"
+    let p = new AbsPath('/file2.txt')
+    p.saveStrSync(str)
+
+    let t = Templatizer.process('file2.txt', new AbsPath('/file2.txt'), 'DoubleWord')
+
+    expect(t.replacements[0].old_text).toEqual("DoubleWord doubleWord double-word double_word DOUBLE_WORD")
+    expect(t.replacements[0].new_text).toEqual("<%= name %> <%= h.inflection.camelize(name, true) %> <%= h.inflection.transform(name, ['underscore','dasherize']) %> <%= h.inflection.underscore(name, false) %> <%= h.inflection.underscore(name, false).toUpperCase() %>")
 })
