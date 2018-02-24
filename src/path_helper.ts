@@ -39,11 +39,11 @@ export class AbsPath {
      * 
      * @param basedir reference point. if null: process.cwd()
      */
-    public relativeFrom(basedir: string | null = null) : string | null {
+    public relativeFrom(basedir: AbsPath | string | null = null) : string | null {
         if ( this.abspath == null ) return null
         if ( basedir == null ) basedir = process.cwd()
 
-        let result = path.relative(basedir, this.abspath)
+        let result = path.relative(basedir.toString(), this.abspath)
         if ( result == "" ) {
             if ( this.isDir ) {
                 result = "."

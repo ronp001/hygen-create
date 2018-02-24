@@ -3,14 +3,16 @@ import {HygenCreate, HygenCreateError, HygenCreateSession} from "../hygen-create
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
 import {AbsPath} from "../path_helper"
+import {Templatizer} from "../templatizer"
+
 // let runner = require('hygen')
 
-let path_to_example = new AbsPath(__dirname).findUpwards('example', true)
 let path_to_output = new AbsPath(__dirname).findUpwards('example_output', true)
 let path_to_templates = path_to_output.add('_templates')
 let path_to_generated = path_to_output.add('generated')
+let examples_path = new AbsPath(__dirname).findUpwards('example', true)
 
-beforeEach(async () => {   
+beforeAll(async () => {   
     process.env['HYGEN_CREATE_TMPLS'] = path_to_templates.toString()
     process.env['HYGEN_TMPLS'] = path_to_templates.toString()
 
@@ -18,30 +20,11 @@ beforeEach(async () => {
     path_to_templates.rmrfdir(/\/example_output\/_templates\//, false)
 })
   
-afterEach(async () => {
+afterAll(async () => {
     mockfs.restore()
 })
 
-test('simple', async () => {
-
-    // create a generator using HygenCreate
-    let hpg = new HygenCreate()
-    hpg.session_file_name = 'example_session.json'
-    expect(hpg.setPathAndLoadSessionIfExists(path_to_example.toString())).toBeFalsy()
-    expect(() => {hpg.startSession('greeter')}).not.toThrow()
-    expect(() => {hpg.add([path_to_example.add('package.json'), path_to_example.add('dist/hello.js')])}).not.toThrow()
-
-    if ( hpg.session == null ) {
-        expect(hpg.session).not.toBeNull()
-    } else {
-        hpg.useName('hello')
-        hpg.generate(false)
-
-        // console.log(MockFSHelper.ls('/_templates', 7, ['*']))
-        expect(path_to_templates.add('greeter/new/dist_hello.js.ejs.t').isFile).toBeTruthy()
-        expect(path_to_templates.add('greeter/new/package.json.ejs.t').isFile).toBeTruthy()
-    }
-
+async function runHygen(hygen_args: string[], template_path: AbsPath, output_path: AbsPath ) {
     function log(...args:any[]) {
         console.log(args)
     }
@@ -52,8 +35,8 @@ test('simple', async () => {
     const Logger = require('../test_support/hygen_logger')
 
     const config = {
-        templates: path_to_templates.toString(),
-        cwd: path_to_generated.toString(),
+        templates: template_path.toString(),
+        cwd: output_path.toString(),
         debug: true,
         exec: (action:any, body:any) => {
           const opts = body && body.length > 0 ? { input: body } : {}
@@ -63,8 +46,129 @@ test('simple', async () => {
         logger: new Logger(log),
     }
 
-    await runner(['greeter', 'new', '--name', 'hola'], config)
+    await runner(hygen_args, config)
+}
+
+function runHygenGenerate(source_path:AbsPath, file_repaths:Array<string>, generator_name:string, usename: string) {
+    let hpg = new HygenCreate()
+    hpg.session_file_name = 'example_session.json'
+    expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
+    expect(() => {hpg.startSession(generator_name)}).not.toThrow()
+
+    let files_abspaths : Array<AbsPath> = []
+    for ( let file of file_repaths ) {
+        files_abspaths.push(source_path.add(file))
+    }
+
+    expect(() => {hpg.add(files_abspaths)}).not.toThrow()
+    
+    if ( hpg.session == null ) {
+        expect(hpg.session).not.toBeNull()
+        return
+    }
+    
+    hpg.useName(usename)
+    hpg.generate(false)
+
+    for ( let relpath of file_repaths ) {
+        let generated = path_to_templates.add(generator_name).add('new').add(Templatizer.template_filename(relpath))
+        console.log("checking if generated: ", generated.toString())
+        expect(generated.isFile).toBeTruthy()
+    }
+}
+
+test('simple', async () => {
+    let source_path = new AbsPath(__dirname).findUpwards('example', true)
+
+    // create a generator using HygenCreate
+    runHygenGenerate(source_path, ['package.json', 'dist/hello.js'], 'greeter', 'hello')
+
+    // run the generator
+    await runHygen(['greeter', 'new', '--name', 'hola'], path_to_templates, path_to_generated)
 
     // see if the generator created the expected files
     expect(path_to_generated.add('hola/dist/hola.js').isFile).toBeTruthy()
 })
+
+test('test strings - single word', async () => {
+    let source_path = new AbsPath(__dirname).findUpwards('example', true)
+
+    // create a generator using HygenCreate
+    runHygenGenerate(source_path, ['test_strings.json'], 'test-generator-single', 'word')
+
+    // run the generator
+    await runHygen(['test-generator-single', 'new', '--name', 'result'], path_to_templates, path_to_generated)
+
+    // see if the generator created the expected files
+    expect(path_to_generated.add('result/test_strings.json').isFile).toBeTruthy()
+})
+
+test('test strings - double word', async () => {
+
+    // create a generator using HygenCreate
+    runHygenGenerate(examples_path, ['test_strings.json'], 'test-generator-double', 'DoubleWord')
+
+    // run the generator
+    await runHygen(['test-generator-double', 'new', '--name', 'TheResult'], path_to_templates, path_to_generated)
+
+    // see if the generator created the expected files
+    expect(path_to_generated.add('TheResult/test_strings.json').isFile).toBeTruthy()
+})
+
+test('section: plain', async () => {
+    await run_test_strings_file_comparison('plain')
+})
+
+async function run_test_strings_file_comparison(section:string) {
+    let test_strings_path = new AbsPath(__dirname).findUpwards('example', true).add('test_strings.json')
+
+    let parsed : any = test_strings_path.contentsFromJSON
+    if ( parsed == null ) {
+        console.log(`can't parse test_strings.json`)
+        expect(parsed).not.toBeNull()
+        return
+    }
+
+    if ( parsed[section] == null ) {
+        console.log(`can't find section '${section}' in test_strings.json`)
+        expect(parsed[section]).not.toBeNull()
+        return        
+    }
+
+    let comparisons : {[key:string] : Array<string>} = parsed[section]['comparisons']
+    let defs :  {[key:string] : string} = parsed[section]['defs']
+
+    if ( comparisons == null || defs == null ) {
+        expect(comparisons).not.toBeNull()
+        expect(defs).not.toBeNull()
+        return
+    }
+
+    // create a generator using HygenCreate
+    let generator_name = `test-generator-${section}`
+    let usename = defs["hygen-create usename"]
+    let hygen_name = defs["hygen --name"]
+    runHygenGenerate(examples_path, ['test_strings.json'], generator_name, usename)
+
+    // run the generator
+    await runHygen([generator_name, 'new', '--name', hygen_name], path_to_templates, path_to_generated.add(section))
+
+    // load the resulting file
+    let generated_file = path_to_generated.add(`${hygen_name}/test_strings.json`)
+    expect(generated_file.isFile).toBeTruthy()
+
+    // compare the generated strings to the expected strings
+
+    let generated_contents : any = generated_file.contentsFromJSON
+    let generated_comparisons : {[key:string] : Array<string>} = generated_contents[section]['comparisons']
+
+    if ( generated_comparisons == null ) {
+        console.log(`could not find comparisons in section ${section} of the generated file ${generated_file.toString()}`)
+        expect(generated_comparisons).not.toBeNull()
+    }
+
+    for ( let desc in generated_comparisons) {
+        expect(`${desc}: ` + generated_comparisons[desc][0]).toEqual(`${desc}: ` +generated_comparisons[desc][1])
+    }
+    
+}

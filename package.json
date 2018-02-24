@@ -16,6 +16,8 @@
     "clean": "rm -rf dist/",
     "relink": "yarn unlink && yarn link",
     "build": "tsc",
+    "test:integration": "jest --testRegex 'src(/__(integration_)?tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$' 'src/__integration_tests__/integration.test.ts'",
+    "test": "jest",
     "test:watch": "jest --watch",
     "doc": "typedoc --out ./doc ./src"
   },
@@ -42,7 +44,7 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "testRegex": "src(/__(integration_)?tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testRegex": "src(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",

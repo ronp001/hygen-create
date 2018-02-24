@@ -1,0 +1,70 @@
+{
+    "about this file": [
+        "This file is used by src/__integration_tests__/integration.test.ts",
+        "Each entry in here is an array of two strings.",
+        "The first string (<string1>) is intended to be the value input for the 'hygen-create usename <string1>' command",
+        "The second (<string2>) is the expected value after running the resulting generator with --name <string2>"
+    ],
+    "about the sections": [
+        "Each section has a 'defs' entry with two definitions:  'hygen-create usename' and 'hygen --name",
+        "When the following command sequence is run:",
+            "  $ hygen-create start test-generator",
+            "  $ hygen-create usename <hygen-create-usename from the defs section>",
+            "  $ hygen-create add test_strings.json",
+            "  $ hygen-create generate",
+            "  $ hygen test-generator new --name <hygen-name from the defs section>",
+            "The expected result in the created file:",
+            "  The first string is expected to become identical to the second",
+            "  The second string should remain as it was in the original file"
+    ],
+    "plain": {
+        "defs": {
+            "hygen-create usename": "result",
+            "hygen --name": "result"
+        },
+        "comparisons": {
+            "plain": ["result", "result"],
+            "capitalized": ["Result", "Result"],
+            "allcaps": ["RESULT", "RESULT"],
+            "with_preceding_underscore": ["_result", "_result"],
+            "with_preceding_underscore_capitalized": ["_Result", "_Result"],
+            "with_preceding_dash": ["-result", "-result"],
+            "with_preceding_dash_capitalized": ["-Result", "-Result"],
+            "with_preceding_result_capitalized": ["ClsWord","ClsResult"]
+        }
+    },
+    "doubled-no-sfx": {
+        "defs": {
+            "hygen-create usename": "DoubleWord",
+            "hygen --name": "TheResult"
+        },
+        "comparisons": {
+            "underscore": ["double_result","the_result"],
+            "underscore_with_preceding_underscore": ["_double_result","_the_result"],
+            "camelcased": ["DoubleWord","TheResult"],
+            "camelcased_with_preceding_underscore": ["_DoubleWord", "_TheResult"],
+            "camelcased_lowerfirst": ["doubleWord", "theResult"],
+            "dashed": ["double-result", "the-result"],
+            "dashed_with_preceding_dash": ["-double-result", "-the-result"],
+            "dashed_capitalized": ["Double-Result", "The-Result"],
+            "underscore_all_caps": ["DOUBLE_RESULT", "THE_RESULT"]
+        }
+    },
+    "double-with-sfx": {
+        "defs": {
+            "hygen-create usename": "DoubleWord",
+            "hygen --name": "TheResult"
+        },
+        "comparisons": {
+            "underscore": ["double_result_with_sfx","the_result_with_sfx"],
+            "underscore_with_preceding_underscore": ["_double_result_with_sfx","_the_result_with_sfx"],
+            "camelcased": ["DoubleWordWithSfx","TheResultWithSfx"],
+            "camelcased_with_preceding_underscore": ["_DoubleWordWithSfx","_TheResultWithSfx"],
+            "camelcased_lowerfirst": ["doubleWordWithSfx","theResultWithSfx"],
+            "dashed": ["double-result-with-sfx","the-result-with-sfx"],
+            "dashed_with_preceding_dash": ["-double-result-with-sfx","-the-result-with-sfx"],
+            "dashed_capitalized": ["Double-Result-With-Sfx","The-Result-With-Sfx"],
+            "underscore_all_caps": ["DOUBLE_RESULT_WITH_SFX","THE_RESULT_WITH_SFX"]
+        }
+    }
+}
