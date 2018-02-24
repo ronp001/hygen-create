@@ -1,5 +1,8 @@
+[![Build Status](https://travis-ci.org/ronp001/hygen-create.svg?branch=master)](https://travis-ci.org/ronp001/hygen-create)
+
 # hygen-create
 Simplifies creation of [hygen](http://www.hygen.io) templates from existing projects
+
 
 ## Why
 
