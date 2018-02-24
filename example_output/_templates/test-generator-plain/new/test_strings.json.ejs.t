@@ -53,7 +53,7 @@ to: <%= name %>/test_strings.json
             "underscore_all_caps": ["DOUBLE_<%= name.toUpperCase() %>", "THE_RESULT"]
         }
     },
-    "double-with-sfx": {
+    "doubled-with-sfx": {
         "defs": {
             "hygen-create usename": "DoubleWord",
             "hygen --name": "TheResult"

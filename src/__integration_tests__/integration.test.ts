@@ -90,7 +90,7 @@ test('simple', async () => {
     expect(path_to_generated.add('hola/dist/hola.js').isFile).toBeTruthy()
 })
 
-test('test strings - single word', async () => {
+test.skip('test strings - single word', async () => {
     let source_path = new AbsPath(__dirname).findUpwards('example', true)
 
     // create a generator using HygenCreate
@@ -103,7 +103,7 @@ test('test strings - single word', async () => {
     expect(path_to_generated.add('result/test_strings.json').isFile).toBeTruthy()
 })
 
-test('test strings - double word', async () => {
+test.skip('test strings - double word', async () => {
 
     // create a generator using HygenCreate
     runHygenGenerate(examples_path, ['test_strings.json'], 'test-generator-double', 'DoubleWord')
@@ -117,6 +117,12 @@ test('test strings - double word', async () => {
 
 test('section: plain', async () => {
     await run_test_strings_file_comparison('plain')
+})
+test('section: doubled-no-sfx', async () => {
+    await run_test_strings_file_comparison('doubled-no-sfx')
+})
+test('section: doubled-with-sfx', async () => {
+    await run_test_strings_file_comparison('doubled-with-sfx')
 })
 
 async function run_test_strings_file_comparison(section:string) {
@@ -154,7 +160,7 @@ async function run_test_strings_file_comparison(section:string) {
     await runHygen([generator_name, 'new', '--name', hygen_name], path_to_templates, path_to_generated.add(section))
 
     // load the resulting file
-    let generated_file = path_to_generated.add(`${hygen_name}/test_strings.json`)
+    let generated_file = path_to_generated.add(`${section}/${hygen_name}/test_strings.json`)
     expect(generated_file.isFile).toBeTruthy()
 
     // compare the generated strings to the expected strings

@@ -50,7 +50,7 @@
             "underscore_all_caps": ["THE_RESULT", "THE_RESULT"]
         }
     },
-    "double-with-sfx": {
+    "doubled-with-sfx": {
         "defs": {
             "hygen-create usename": "TheResult",
             "hygen --name": "TheResult"
