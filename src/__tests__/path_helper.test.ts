@@ -3,51 +3,64 @@ import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
 import * as path from 'path'
 import {AbsPath} from "../path_helper"
+import {MockFSHelper} from "./mock-fs-helper"
+
+
+let simfs = new MockFSHelper({
+    '/base': {
+        'file1' : "this is file1",
+        'file2' : "this is file2",
+        'symlink_to_file1': mockfs.symlink({ path: 'file1 '}),
+        'f' : "f in /",
+        'inner' : {
+            'file-in-inner': 'this is root/inner/file-in-inner'
+        }
+    },
+    '/dir1' : {
+        '1file1' : "this is 1file1",
+        'f' : "f in /dir1"
+    },
+    '/dir1/dir11' : {
+        '11file1' : "this is 11file1",
+        '11file2' : "this is 11file2",
+        'f' : "f in /dir1/dir11",
+    },
+    '/dir1/dir12' : {
+        '12file1' : "this is 12file1",
+        '12file2' : "this is 12file2",
+        'f' : "f in /dir1/dir12",
+    },
+})
 
 // Prepare path_helper.ts for inclusion in the mocked filesystem
 // so that exceptions are displayed properly by jest
-let path_to_ts = __dirname + "/../path_helper.ts"
-let ts_contents = fs.readFileSync(path_to_ts)
+simfs.addFile(__dirname + "/../path_helper.ts")
+
 
 beforeEach(async () => {
-    // Creates an in-memory file system 
-    let simfs : {[key:string]: any} = {
-        '/base': {
-            'file1' : "this is file1",
-            'file2' : "this is file2",
-            'symlink_to_file1': mockfs.symlink({ path: 'file1 '}),
-            'f' : "f in /",
-            'inner' : {
-                'file-in-inner': 'this is root/inner/file-in-inner'
-            }
-        },
-        '/dir1' : {
-            '1file1' : "this is 1file1",
-            'f' : "f in /dir1"
-        },
-        '/dir1/dir11' : {
-            '11file1' : "this is 11file1",
-            '11file2' : "this is 11file2",
-            'f' : "f in /dir1/dir11",
-        },
-        '/dir1/dir12' : {
-            '12file1' : "this is 12file1",
-            '12file2' : "this is 12file2",
-            'f' : "f in /dir1/dir12",
-        },
-    }
-        // make sure exceptions are displayed properly by jest
-    simfs[path_to_ts] = ts_contents
-    mockfs(simfs)
+    mockfs(simfs.fs_structure)
 })
   
 afterEach(async () => {
     mockfs.restore()
 })
 
-test('cwd-related mocks are working as documented', () => {
+test('mockfs({}) adds the current directory', () => {
     mockfs({})
     expect(AbsPath.fromStringAllowingRelative().isDir).toBeTruthy()
+})
+
+test('path_helper is in the mocked fs', () => {
+    expect(new AbsPath(__dirname + "/../path_helper.ts").isFile).toBeTruthy()
+})
+
+test('binary file recognition', () => {
+    mockfs.restore()
+    expect(new AbsPath(__dirname + "../../../example/example_status.png").isFile).toBeTruthy()
+    expect(new AbsPath(__dirname + "../../../example/example_status.png").isBinaryFile).toBeTruthy()
+
+    expect(new AbsPath(__dirname + "../../../example/package.json").isFile).toBeTruthy()
+    expect(new AbsPath(__dirname + "../../../example/package.json").isBinaryFile).toBeFalsy()
 })
 
 test.skip('traversal', () => {

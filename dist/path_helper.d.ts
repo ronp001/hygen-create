@@ -40,6 +40,7 @@ export declare class AbsPath {
      */
     relativeTo(other: AbsPath, must_be_contained_in_other?: boolean): string | null;
     readonly exists: boolean;
+    readonly isBinaryFile: boolean;
     readonly isFile: boolean;
     readonly isDir: boolean;
     readonly isSymLink: boolean;

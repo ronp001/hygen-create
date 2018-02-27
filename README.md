@@ -157,6 +157,18 @@ This shows us what the resulting template file will look like (in [hygen templat
 ### [TODO:  finish the example session]
 ---
 
+## Limitations
+
+### String format (CamelCase, dash-cased, etc.) for the ```hygen-create usename <name>``` command
+
+TL;DR: provide a CamelCased ```usename/--name``` value both to ```hygen-create``` and to ```hygen```
+
+* ```hygen-create``` currently works best if you provide a CamelCased string to the ```usename``` command.  When provided a CamelCased name, ```hygen-create``` 
+will recognize dash-cased, underscore_cased "Title Cased" and other versions.  But this recognition currently doesn't work well when the
+value provided to ```usename``` not CamelCased.
+* There is currently a tight relationship between the format of the ```usename``` string provided to ```hygen-create``` and the string that needs to be provided to ```hygen <generator> new --name <name>```.  This may be changed in the future, but right now you should provide the same 
+format to both commands.
+
 ## List of availble commands:
 ```
 $ hygen-create --help

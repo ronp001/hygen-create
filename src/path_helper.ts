@@ -1,5 +1,6 @@
 import * as path from 'path'
 import * as fs from 'fs'
+var isBinaryFile = require("isbinaryfile")
 
 /**
  * An immutable path object with utility methods to navigate the filesystem, get information and perform 
@@ -110,6 +111,14 @@ export class AbsPath {
             return false
         }
     }
+
+    public get isBinaryFile() : boolean {
+        if ( this.abspath == null ) return false
+        if ( !this.isFile ) return false
+        
+        return isBinaryFile.sync(this.abspath);
+    }
+
     public get isFile() : boolean {
         if ( this.abspath == null ) return false
         try {

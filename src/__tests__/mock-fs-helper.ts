@@ -3,12 +3,22 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as _ from 'lodash'
 import { AbsPath } from '../path_helper';
+import { isString } from 'util';
 
 export class MockFSHelper {
-    public fs_structure : {[key:string]:any} = {}
+
+    public constructor(public fs_structure : {[key:string]:any} = {}) {}
 
     public addSourceDirContents() : MockFSHelper {
         this.addDirContents(this.src_dir)
+        return this
+    }
+
+    public addFile(file: AbsPath|string) : MockFSHelper {
+        if ( isString(file) ) {
+            file = new AbsPath(file)
+        }
+        this.fs_structure[file.abspath] = file.contentsBuffer.toString() 
         return this
     }
 
