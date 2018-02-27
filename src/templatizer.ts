@@ -21,9 +21,14 @@ export class TemplateInfo {
     }
 
     public get header() : string {
+
+        
         let header = ""
+
         + "---\n"
-        + `to: <%= name %>/${this.target_filename}\n`
+        // + this.getProcessedText(`to: ${this.using_name}`) + `/${this.target_filename}\n`
+        + `to: <%= name %>/` + this.target_filename + "\n"
+        // + `to: <%= name %>/${this.target_filename}\n`
         + "---\n"
         
         return header
@@ -61,7 +66,7 @@ export class TemplateInfo {
 
     public replacer(to_word:string) {
         return (match:string, p1_pfx:string, p2_words:string, 
-                    p2a_exact:string,
+//                    p2a_exact:string,
                     p2b_uppercased:string, 
                     p2b_lowercased:string, 
                     p2b_capitalized:string, 
@@ -74,9 +79,9 @@ export class TemplateInfo {
                 offset:number, whole_string:string) => {
             let result : string 
 
-            if ( p2a_exact ) {
+            /*if ( p2a_exact ) {
                 result = to_word
-            } else if ( p2b_uppercased ) {
+            } else */ if ( p2b_uppercased ) {
                 result = `${to_word}.toUpperCase()`
             } else if ( p2b_lowercased ) {
                 result = `${to_word}.toLowerCase()`
@@ -114,8 +119,9 @@ export class TemplateInfo {
         let dasherized = inflection.transform(from_word, ['underscore','dasherize'])
         let titlized = inflection.titleize(from_word)
 
-        let combined = `(${from_word})`
-                    +  `|(${uppercased})`
+        let combined = ""
+//                    +  `(${from_word})`
+                    +  `(${uppercased})`
                     +  `|(${lowercased})`
                     +  `|(${capitalized})`
                     +  `|(${camelized})`
@@ -126,7 +132,6 @@ export class TemplateInfo {
                     +  `|(${titlized})`
 
         return new RegExp(`(^|[^a-zA-Z0-9])(${combined})`,'g')
-        // return new RegExp(`(^|[^a-zA-Z0-9])((${from_word})|(${_.capitalize(from_word)}))`,'g')
     }
 
     public getProcessedText(text:string) : string | null {

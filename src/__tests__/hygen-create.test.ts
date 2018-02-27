@@ -254,7 +254,7 @@ describe('templatizations', () => {
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('to: <%= name %>/package.json')
             expect(tpl[l++]).toEqual('---')
-            expect(tpl[l++]).toEqual('{"name":"<%= name %>"}')
+            expect(tpl[l++]).toEqual('{"name":"<%= name.toLowerCase() %>"}')
         }
     })
     test('template for multiline file', () => {
@@ -270,11 +270,11 @@ describe('templatizations', () => {
             let l=0
             expect(tpl.length).toEqual(8)
             expect(tpl[l++]).toEqual('---')
-            expect(tpl[l++]).toEqual('to: <%= name %>/src/<%= name %>.ts')
+            expect(tpl[l++]).toEqual('to: <%= name %>/src/<%= name.toLowerCase() %>.ts')
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('class <%= h.capitalize(name) %>')
             expect(tpl[l++]).toEqual('{constructor(){')
-            expect(tpl[l++]).toEqual('console.log("This is <%= name %>")')
+            expect(tpl[l++]).toEqual('console.log("This is <%= name.toLowerCase() %>")')
             expect(tpl[l++]).toEqual('}')
             expect(tpl[l++]).toEqual('}')
         }

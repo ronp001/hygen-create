@@ -30,7 +30,7 @@
             "with_preceding_underscore_capitalized": ["_Word", "_Result"],
             "with_preceding_dash": ["-word", "-result"],
             "with_preceding_dash_capitalized": ["-Word", "-Result"],
-            "with_preceding_word_capitalized": ["ClsWord","ClsResult"]
+            "with_preceding_word_capitalized": ["ClsWord","ClsWord", "not converted"]
         }
     },
     "doubled-no-sfx": {
@@ -46,7 +46,6 @@
             "camelcased_lowerfirst": ["doubleWord", "theResult"],
             "dashed": ["double-word", "the-result"],
             "dashed_with_preceding_dash": ["-double-word", "-the-result"],
-            "dashed_capitalized": ["Double-Word", "The-Result"],
             "underscore_all_caps": ["DOUBLE_WORD", "THE_RESULT"]
         }
     },
@@ -63,7 +62,6 @@
             "camelcased_lowerfirst": ["doubleWordWithSfx","theResultWithSfx"],
             "dashed": ["double-word-with-sfx","the-result-with-sfx"],
             "dashed_with_preceding_dash": ["-double-word-with-sfx","-the-result-with-sfx"],
-            "dashed_capitalized": ["Double-Word-With-Sfx","The-Result-With-Sfx"],
             "underscore_all_caps": ["DOUBLE_WORD_WITH_SFX","THE_RESULT_WITH_SFX"]
         }
     }

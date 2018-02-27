@@ -22,18 +22,18 @@ to: <%= name %>/test_strings.json
     ],
     "plain": {
         "defs": {
-            "hygen-create usename": "<%= name %>",
+            "hygen-create usename": "<%= name.toLowerCase() %>",
             "hygen --name": "result"
         },
         "comparisons": {
-            "plain": ["<%= name %>", "result"],
+            "plain": ["<%= name.toLowerCase() %>", "result"],
             "capitalized": ["<%= h.capitalize(name) %>", "Result"],
             "allcaps": ["<%= name.toUpperCase() %>", "RESULT"],
-            "with_preceding_underscore": ["_<%= name %>", "_result"],
+            "with_preceding_underscore": ["_<%= name.toLowerCase() %>", "_result"],
             "with_preceding_underscore_capitalized": ["_<%= h.capitalize(name) %>", "_Result"],
-            "with_preceding_dash": ["-<%= name %>", "-result"],
+            "with_preceding_dash": ["-<%= name.toLowerCase() %>", "-result"],
             "with_preceding_dash_capitalized": ["-<%= h.capitalize(name) %>", "-Result"],
-            "with_preceding_<%= name %>_capitalized": ["ClsWord","ClsResult"]
+            "with_preceding_<%= name.toLowerCase() %>_capitalized": ["ClsWord","ClsWord", "not converted"]
         }
     },
     "doubled-no-sfx": {
@@ -42,14 +42,13 @@ to: <%= name %>/test_strings.json
             "hygen --name": "TheResult"
         },
         "comparisons": {
-            "underscore": ["double_<%= name %>","the_result"],
-            "underscore_with_preceding_underscore": ["_double_<%= name %>","_the_result"],
+            "underscore": ["double_<%= name.toLowerCase() %>","the_result"],
+            "underscore_with_preceding_underscore": ["_double_<%= name.toLowerCase() %>","_the_result"],
             "camelcased": ["DoubleWord","TheResult"],
             "camelcased_with_preceding_underscore": ["_DoubleWord", "_TheResult"],
             "camelcased_lowerfirst": ["doubleWord", "theResult"],
-            "dashed": ["double-<%= name %>", "the-result"],
-            "dashed_with_preceding_dash": ["-double-<%= name %>", "-the-result"],
-            "dashed_capitalized": ["Double-<%= h.capitalize(name) %>", "The-Result"],
+            "dashed": ["double-<%= name.toLowerCase() %>", "the-result"],
+            "dashed_with_preceding_dash": ["-double-<%= name.toLowerCase() %>", "-the-result"],
             "underscore_all_caps": ["DOUBLE_<%= name.toUpperCase() %>", "THE_RESULT"]
         }
     },
@@ -59,14 +58,13 @@ to: <%= name %>/test_strings.json
             "hygen --name": "TheResult"
         },
         "comparisons": {
-            "underscore": ["double_<%= name %>_with_sfx","the_result_with_sfx"],
-            "underscore_with_preceding_underscore": ["_double_<%= name %>_with_sfx","_the_result_with_sfx"],
+            "underscore": ["double_<%= name.toLowerCase() %>_with_sfx","the_result_with_sfx"],
+            "underscore_with_preceding_underscore": ["_double_<%= name.toLowerCase() %>_with_sfx","_the_result_with_sfx"],
             "camelcased": ["DoubleWordWithSfx","TheResultWithSfx"],
             "camelcased_with_preceding_underscore": ["_DoubleWordWithSfx","_TheResultWithSfx"],
             "camelcased_lowerfirst": ["doubleWordWithSfx","theResultWithSfx"],
-            "dashed": ["double-<%= name %>-with-sfx","the-result-with-sfx"],
-            "dashed_with_preceding_dash": ["-double-<%= name %>-with-sfx","-the-result-with-sfx"],
-            "dashed_capitalized": ["Double-<%= h.capitalize(name) %>-With-Sfx","The-Result-With-Sfx"],
+            "dashed": ["double-<%= name.toLowerCase() %>-with-sfx","the-result-with-sfx"],
+            "dashed_with_preceding_dash": ["-double-<%= name.toLowerCase() %>-with-sfx","-the-result-with-sfx"],
             "underscore_all_caps": ["DOUBLE_<%= name.toUpperCase() %>_WITH_SFX","THE_RESULT_WITH_SFX"]
         }
     }

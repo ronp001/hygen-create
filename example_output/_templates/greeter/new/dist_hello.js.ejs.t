@@ -1,5 +1,5 @@
 ---
-to: <%= name %>/dist/<%= name %>.js
+to: <%= name %>/dist/<%= name.toLowerCase() %>.js
 ---
-// This is <%= name %>.js
+// This is <%= name.toLowerCase() %>.js
 console.log("<%= h.capitalize(name) %>!")

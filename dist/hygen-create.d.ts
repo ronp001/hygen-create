@@ -125,7 +125,7 @@ export declare class HygenCreate {
      * cancel the current session and delete the session file
      */
     abort(): void;
-    add(files_and_dirs: string[], recursive?: boolean, in_subdir?: boolean): void;
+    add(files_and_dirs: string[] | AbsPath[], recursive?: boolean, in_subdir?: boolean): void;
     remove(files: string[]): void;
     /**
      * get the definition of param

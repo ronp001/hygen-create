@@ -2,10 +2,10 @@
 to: <%= name %>/package.json
 ---
 {
-  "name": "<%= name %>",
+  "name": "<%= name.toLowerCase() %>",
   "version": "1.0.0",
   "description": "an application that prints '<%= h.capitalize(name) %>!'",
   "scripts" : {
-    "<%= name %>": "node dist/<%= name %>.js"
+    "<%= name.toLowerCase() %>": "node dist/<%= name.toLowerCase() %>.js"
   }
 }

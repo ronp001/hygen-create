@@ -5,6 +5,7 @@
  */
 export declare class AbsPath {
     readonly abspath: string | null;
+    readonly basename: string;
     /**
      * create an absolute path from a string
      *
@@ -18,7 +19,7 @@ export declare class AbsPath {
      *
      * @param basedir reference point. if null: process.cwd()
      */
-    relativeFrom(basedir?: string | null): string | null;
+    relativeFrom(basedir?: AbsPath | string | null): string | null;
     /**
      *
      * @param from a string or AbsPath specifying an absolute path, or null
@@ -44,11 +45,12 @@ export declare class AbsPath {
     readonly isSymLink: boolean;
     readonly isRoot: boolean;
     containsFile(filename: string): boolean;
+    containsDir(filename: string): boolean;
     readonly parent: AbsPath;
-    add(filepath: string): AbsPath;
+    add(filepath: string | AbsPath): AbsPath;
     static dirHierarchy(filepath: string): Array<AbsPath>;
     readonly dirHierarchy: Array<AbsPath>;
-    findUpwards(filename: string): AbsPath;
+    findUpwards(filename: string, can_be_dir?: boolean): AbsPath;
     readonly contentsBuffer: Buffer;
     readonly contentsLines: Array<string>;
     readonly contentsFromJSON: Object | null;
@@ -57,4 +59,6 @@ export declare class AbsPath {
     unlinkFile(): void;
     rmFile(): void;
     readonly dirContents: Array<AbsPath> | null;
+    foreachEntryInDir(fn: (entry: AbsPath, traversal_direction: "down" | "up" | null) => void): void;
+    rmrfdir(must_match: RegExp, remove_self?: boolean): void;
 }

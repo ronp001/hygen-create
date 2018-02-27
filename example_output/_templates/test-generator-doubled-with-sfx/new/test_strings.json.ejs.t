@@ -33,40 +33,38 @@ to: <%= name %>/test_strings.json
             "with_preceding_underscore_capitalized": ["_Word", "_Result"],
             "with_preceding_dash": ["-word", "-result"],
             "with_preceding_dash_capitalized": ["-Word", "-Result"],
-            "with_preceding_word_capitalized": ["ClsWord","ClsResult"]
+            "with_preceding_word_capitalized": ["ClsWord","ClsWord", "not converted"]
         }
     },
     "doubled-no-sfx": {
         "defs": {
-            "hygen-create usename": "<%= name %>",
+            "hygen-create usename": "<%= h.inflection.camelize(name, false) %>",
             "hygen --name": "TheResult"
         },
         "comparisons": {
             "underscore": ["<%= h.inflection.underscore(name, false) %>","the_result"],
             "underscore_with_preceding_underscore": ["_<%= h.inflection.underscore(name, false) %>","_the_result"],
-            "camelcased": ["<%= name %>","TheResult"],
-            "camelcased_with_preceding_underscore": ["_<%= name %>", "_TheResult"],
+            "camelcased": ["<%= h.inflection.camelize(name, false) %>","TheResult"],
+            "camelcased_with_preceding_underscore": ["_<%= h.inflection.camelize(name, false) %>", "_TheResult"],
             "camelcased_lowerfirst": ["<%= h.inflection.camelize(name, true) %>", "theResult"],
             "dashed": ["<%= h.inflection.transform(name, ['underscore','dasherize']) %>", "the-result"],
             "dashed_with_preceding_dash": ["-<%= h.inflection.transform(name, ['underscore','dasherize']) %>", "-the-result"],
-            "dashed_capitalized": ["Double-Word", "The-Result"],
             "underscore_all_caps": ["<%= h.inflection.underscore(name, false).toUpperCase() %>", "THE_RESULT"]
         }
     },
     "doubled-with-sfx": {
         "defs": {
-            "hygen-create usename": "<%= name %>",
+            "hygen-create usename": "<%= h.inflection.camelize(name, false) %>",
             "hygen --name": "TheResult"
         },
         "comparisons": {
             "underscore": ["<%= h.inflection.underscore(name, false) %>_with_sfx","the_result_with_sfx"],
             "underscore_with_preceding_underscore": ["_<%= h.inflection.underscore(name, false) %>_with_sfx","_the_result_with_sfx"],
-            "camelcased": ["<%= name %>WithSfx","TheResultWithSfx"],
-            "camelcased_with_preceding_underscore": ["_<%= name %>WithSfx","_TheResultWithSfx"],
+            "camelcased": ["<%= h.inflection.camelize(name, false) %>WithSfx","TheResultWithSfx"],
+            "camelcased_with_preceding_underscore": ["_<%= h.inflection.camelize(name, false) %>WithSfx","_TheResultWithSfx"],
             "camelcased_lowerfirst": ["<%= h.inflection.camelize(name, true) %>WithSfx","theResultWithSfx"],
             "dashed": ["<%= h.inflection.transform(name, ['underscore','dasherize']) %>-with-sfx","the-result-with-sfx"],
             "dashed_with_preceding_dash": ["-<%= h.inflection.transform(name, ['underscore','dasherize']) %>-with-sfx","-the-result-with-sfx"],
-            "dashed_capitalized": ["Double-Word-With-Sfx","The-Result-With-Sfx"],
             "underscore_all_caps": ["<%= h.inflection.underscore(name, false).toUpperCase() %>_WITH_SFX","THE_RESULT_WITH_SFX"]
         }
     }

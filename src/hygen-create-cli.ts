@@ -4,6 +4,7 @@ import * as fs from "fs"
 import * as _ from "lodash"
 import chalk from 'chalk'
 import {CliApp} from "./cli-app"
+import {AbsPath} from "./path_helper"
 import {HygenCreate,HygenCreateError} from './hygen-create'
 import {TemplateInfo} from './templatizer'
 
@@ -19,7 +20,11 @@ export default class HygenCreateCli extends CliApp {
             this.hgc.outputFunc = console.log
         }
 
-        this.hgc.setPathAndLoadSessionIfExists(process.cwd())
+        let project_search_path = process.cwd()
+        if ( program.project ) {
+            this.hgc.session_file_name = program.project
+        }
+        this.hgc.setPathAndLoadSessionIfExists(project_search_path)
     }
 
     protected afterCommand() {
@@ -33,7 +38,7 @@ export default class HygenCreateCli extends CliApp {
         .description('hygen-create - create hygen templates from an existing project')
         .version('0.1.0')
         .option('-v, --verbose', "provide more info")
-        // .option('-p, --project <path>', "path to project file (default: scan up from current dir)")
+        .option('-p, --project <filename>', `name of session definitions file (default: ${HygenCreate.default_session_file_name})`)
 
         //-------------------------
         // Control commands
@@ -84,7 +89,6 @@ export default class HygenCreateCli extends CliApp {
         .option('-f, --force', "overwrite generator files even if they exist")
         .action(this.action(this.generate));
         
-
     }
 
     private start(name: string, options:any) {
