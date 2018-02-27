@@ -10,7 +10,11 @@ export interface ReplacementInfo {
 }
 
 export class TemplateInfo {
-    constructor(public relpath: string, public abspath: AbsPath, public using_name: string) {}
+    public is_binary : boolean
+
+    constructor(public relpath: string, public abspath: AbsPath, public using_name: string) {
+        this.is_binary = abspath.isBinaryFile
+    }
 
     public get template_filename() : string {
         return Templatizer.template_filename(this.relpath)
@@ -49,6 +53,10 @@ export class TemplateInfo {
     private _lines_after_replacements : Array<string> = []
 
     public process() {
+        if ( this.is_binary ) {
+            return
+        }
+        
         this._lines = this.abspath.contentsBuffer.toString().split('\n')
 
         let num = 0

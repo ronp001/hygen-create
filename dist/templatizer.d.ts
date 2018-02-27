@@ -8,6 +8,7 @@ export declare class TemplateInfo {
     relpath: string;
     abspath: AbsPath;
     using_name: string;
+    is_binary: boolean;
     constructor(relpath: string, abspath: AbsPath, using_name: string);
     readonly template_filename: string;
     readonly target_filename: string;

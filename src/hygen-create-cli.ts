@@ -119,6 +119,10 @@ export default class HygenCreateCli extends CliApp {
         // console.log(tinfo.replacements)
         // console.log(replacement_lines)
         
+        if(tinfo.is_binary) {
+            console.log("<binary file>")
+            return
+        }
         //-------------------------------
         // show the template header
         //-------------------------------
@@ -276,6 +280,9 @@ export default class HygenCreateCli extends CliApp {
 
             if ( finfo.included ) {
                 line = chalk.blue('[included] - ') + color(fname)
+                if ( finfo.is_binary ) {
+                    line = chalk.red(`[ignored ] - ${fname} (binary file)`)
+                }
             } else {
                 line = chalk.gray(`[excluded] - ${fname}`)
             }

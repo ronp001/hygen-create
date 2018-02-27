@@ -48,6 +48,7 @@ export interface FileInfo {
     path: AbsPath
     included: boolean
     found: boolean
+    is_binary: boolean
 }
 
 
@@ -252,9 +253,13 @@ export class HygenCreate {
                 if ( this.session.files_and_dirs[relpath] ) { 
                     this.output("already added:", relpath)
                 } else {
-                    this.output("adding: ", relpath)
-                    this.session.files_and_dirs[relpath] = true
-                    this.debug("session after add", this.session)
+                    if ( p.isBinaryFile ) {
+                        this.output(chalk.red("not adding binary file: " + relpath))
+                    } else {
+                        this.output("adding: ", relpath)
+                        this.session.files_and_dirs[relpath] = true
+                        this.debug("session after add", this.session)
+                    }
                 }
             } else if ( p.isDir ) {   
                 if ( in_subdir && !recursive ) {
@@ -337,7 +342,7 @@ export class HygenCreate {
             if ( this.session.templatize_using_name == null ) throw new HygenCreateError.FromNameNotDefined
             using_name = this.session.templatize_using_name
         }
-        let abspath = this.fileAbsPathFromRelPath(relpath)    
+        let abspath = this.fileAbsPathFromRelPath(relpath)
         let tinfo = Templatizer.process(relpath, abspath, using_name)
         return tinfo
     }
@@ -397,6 +402,7 @@ export class HygenCreate {
 
             let included : boolean = false
             let found : boolean = false
+            let is_binary = p.isBinaryFile
 
             if ( relpath_from_top != null ) {
                 found = true
@@ -406,7 +412,8 @@ export class HygenCreate {
             let fileinfo = {
                 path: p,
                 included: included,
-                found: found
+                found: found,
+                is_binary: is_binary
             }
 
             result.push(fileinfo)
@@ -457,6 +464,10 @@ export class HygenCreate {
 
     public getTemplateTextFor(relpath: string) : string {
         let tinfo = this.getTemplate(relpath, null)
+        
+        if(tinfo.is_binary) {
+            return "<binary file>"
+        }
 
         return tinfo.header + tinfo.contentsAfterReplacements
     }

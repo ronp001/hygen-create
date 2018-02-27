@@ -19,7 +19,6 @@
     "LICENSE.txt": true,
     "README.md": true,
     "example/dist/hello.js": true,
-    "example/example_status.png": true,
     "example/package.json": true,
     ".npmignore": true,
     ".travis.yml": true

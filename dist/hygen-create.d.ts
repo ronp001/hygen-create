@@ -62,6 +62,7 @@ export interface FileInfo {
     path: AbsPath;
     included: boolean;
     found: boolean;
+    is_binary: boolean;
 }
 export declare class HygenCreate {
     session: HygenCreateSession | null;
