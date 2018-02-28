@@ -84,8 +84,8 @@ test('binary file recognition', () => {
     expect(new AbsPath(__dirname).add("../../example/package.json").isFile).toBeTruthy()
     expect(new AbsPath(__dirname).add("../../example/package.json").isBinaryFile).toBeFalsy()
 
-    expect(new AbsPath(__dirname).add("../../example/example_status.png").isFile).toBeTruthy()
-    expect(new AbsPath(__dirname).add("../../example/example_status.png").isBinaryFile).toBeTruthy()
+    expect(new AbsPath(__dirname).add("../../doc/example_status.png").isFile).toBeTruthy()
+    expect(new AbsPath(__dirname).add("../../doc/example_status.png").isBinaryFile).toBeTruthy()
 })
 
 test.skip('traversal', () => {
