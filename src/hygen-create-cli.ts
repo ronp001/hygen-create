@@ -1,5 +1,4 @@
 import * as program from 'commander'  
-import * as inquirer from 'inquirer'
 import * as fs from "fs"
 import * as _ from "lodash"
 import chalk from 'chalk'
@@ -320,12 +319,5 @@ export default class HygenCreateCli extends CliApp {
         let force : boolean = !!options.force
         // if ( force ) console.log("FORCE!")
         this.hgc.generate(force)
-    }
-    private inquire() {
-        inquirer.prompt([
-            /* Pass your questions in here */
-        ]).then(answers => {
-            // Use user feedback for... whatever!!
-        });    
     }
 }

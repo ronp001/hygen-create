@@ -1,13 +1,23 @@
 {
   "name": "hygen-create",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "keywords": [
+    "hygen",
+    "template-generator"
+  ],
   "description": "simplifies creation of hygen templates from existing projects",
   "main": "dist/hygen-create.js",
-  "author": "Ron Perry <ronp001@gmail.com>",
+  "author": "Ron Perry",
+  "files": [
+    "bin/*",
+    "dist/*",
+    "example/*"
+  ],
   "license": "MIT",
   "bin": {
     "hygen-create": "./bin/hygen-create"
   },
+  "bugs": "https://github.com/ronp001/hygen-create/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/ronp001/hygen-create"
@@ -16,6 +26,7 @@
     "clean": "rm -rf dist/",
     "relink": "yarn unlink && yarn link",
     "build": "tsc",
+    "build:production": "yarn clean && tsc -p tsconfig-prod.json && yarn pack",
     "test:integration": "jest --testRegex 'src(/__(integration_)?tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$' 'src/__integration_tests__/integration.test.ts'",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -25,13 +36,11 @@
     "chalk": "^2.3.1",
     "commander": "^2.14.1",
     "inflection": "^1.12.0",
-    "inquirer": "^5.1.0",
     "isbinaryfile": "^3.0.2",
     "lodash": "^4.17.5"
   },
   "devDependencies": {
     "@types/inflection": "^1.5.28",
-    "@types/inquirer": "^0.0.36",
     "@types/jest": "^22.1.2",
     "@types/lodash": "^4.14.104",
     "@types/mock-fs": "^3.6.30",

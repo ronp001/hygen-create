@@ -55,6 +55,8 @@ export declare class AbsPath {
     readonly contentsBuffer: Buffer;
     readonly contentsLines: Array<string>;
     readonly contentsFromJSON: Object | null;
+    readonly symLinkTarget: AbsPath;
+    readonly realpath: AbsPath;
     mkdirs(): void;
     saveStrSync(contents: string): void;
     unlinkFile(): void;

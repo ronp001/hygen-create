@@ -18,18 +18,17 @@ The resulting template files can be used as is (using the `hygen <generator> new
 
 ## Installation
 
-This is still work in progress, so not available on npm yet. 
-
-To work with this, clone the repository and run:
-
 ```
-$ cd hygen-create
-$ yarn link
-$ yarn
+$ yarn global add hygen-create
 ```
 
-This should make the `hygen-create` command available.
+or
 
+```
+$ npm install -g hygen-create
+```
+
+Note that this does NOT install `hygen`. To use the generated generators you must have [hygen](http://www.hygen.io) installed too.
 
 ## Generating a generator
 
@@ -154,7 +153,7 @@ Target template dir not set (export HYGEN_CREATE_TMPLS= to set it)
 If we'd like to see how our files will be templatized, we can use `hygen-create status -v <file>` to check that out.
 
 So typing ```$ hygen-create status -v package.json``` will output:
-![Alt example](example/example_status.png)
+![Alt example](doc/example_status.png)
 
 This shows us what the resulting template file will look like (in [hygen template format](http://www.hygen.io/templates)), including a diff of the lines that undergo parameterization.
 
@@ -176,7 +175,7 @@ generating: /tmp/_templates/greeter/new/dist_hello.js.ejs.t
 
 ### using the generator
 
-We now have a `hygen` generator called `greeter`.  We can new use this generator, for example:
+We now have a `hygen` generator called `greeter` that is ready to use. For example, we can run:
 ```
 $ export HYGEN_TMPLS=/tmp/_templates 
 $ mkdir /tmp/dev 

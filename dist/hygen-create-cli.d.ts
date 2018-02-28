@@ -12,5 +12,4 @@ export default class HygenCreateCli extends CliApp {
     private usename(name);
     private show(fileOrDir, otherFilesOrDirs);
     private generate(options);
-    private inquire();
 }
