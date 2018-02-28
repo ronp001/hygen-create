@@ -80,11 +80,12 @@ test('path_helper is in the mocked fs', () => {
 
 test('binary file recognition', () => {
     mockfs.restore()
-    expect(new AbsPath(__dirname + "../../../example/example_status.png").isFile).toBeTruthy()
-    expect(new AbsPath(__dirname + "../../../example/example_status.png").isBinaryFile).toBeTruthy()
+    console.log("path:", new AbsPath(__dirname).add("../../example/package.json").toString())
+    expect(new AbsPath(__dirname).add("../../example/package.json").isFile).toBeTruthy()
+    expect(new AbsPath(__dirname).add("../../example/package.json").isBinaryFile).toBeFalsy()
 
-    expect(new AbsPath(__dirname + "../../../example/package.json").isFile).toBeTruthy()
-    expect(new AbsPath(__dirname + "../../../example/package.json").isBinaryFile).toBeFalsy()
+    expect(new AbsPath(__dirname).add("../../example/example_status.png").isFile).toBeTruthy()
+    expect(new AbsPath(__dirname).add("../../example/example_status.png").isBinaryFile).toBeTruthy()
 })
 
 test.skip('traversal', () => {
