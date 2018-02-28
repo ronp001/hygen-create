@@ -115,7 +115,7 @@ export class AbsPath {
     public get isBinaryFile() : boolean {
         if ( this.abspath == null ) return false
         if ( !this.isFile ) return false
-        
+
         return isBinaryFile.sync(this.abspath);
     }
 
@@ -216,19 +216,31 @@ export class AbsPath {
         }
     }
 
+    public get symLinkTarget() : AbsPath {
+        if ( this.abspath == null ) return this
+        if ( !this.isSymLink ) return this
+        return new AbsPath(fs.readlinkSync(this.abspath).toString())
+    }
+
+    public get realpath() : AbsPath {
+        if ( this.abspath == null ) return this
+
+        return new AbsPath(fs.realpathSync(this.abspath))
+    }
+
     public mkdirs() {
         if ( this.abspath == null ) throw new Error("can't mkdirs for null abspath")
         if ( this.exists ) return
         if ( this.isRoot ) return
 
-        let parent = this.parent        
-        if ( parent.exists ) {
-            if ( !parent.isDir ) throw new Error(`${parent.toString()} exists and is not a directory`)
+        let parent = this.parent
+        if ( parent.exists && !parent.isDir && !parent.isSymLink) {
+            throw new Error(`${parent.toString()} exists and is not a directory or symlink`)
         } else {
             parent.mkdirs()
         }
 
-        fs.mkdirSync(this.abspath)
+        fs.mkdirSync(this.parent.realpath.add(this.basename).toString())
     }
 
     public saveStrSync(contents:string) {

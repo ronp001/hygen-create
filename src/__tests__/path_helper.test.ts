@@ -7,6 +7,8 @@ import {MockFSHelper} from "./mock-fs-helper"
 
 
 let simfs = new MockFSHelper({
+    '/link1': mockfs.symlink({ path: '/dir1/dir11' }),
+    '/link2': mockfs.symlink({ path: '/base/file1' }),
     '/base': {
         'file1' : "this is file1",
         'file2' : "this is file2",
@@ -44,6 +46,28 @@ beforeEach(async () => {
 afterEach(async () => {
     mockfs.restore()
 })
+
+test('mkdirs via symlink', () => {
+    let p = '/link1/dir111/dir1111'
+    expect(new AbsPath(p).exists).toBeFalsy()
+    expect(() => {new AbsPath(p).mkdirs()}).not.toThrow()
+    expect(new AbsPath(p).isDir).toBeTruthy()
+})
+
+test('mkdirs to illegal path', () => {
+    let p = '/base/file1/d1'
+    expect(new AbsPath(p).exists).toBeFalsy()
+    expect(() => {new AbsPath(p).mkdirs()}).toThrow()
+    expect(new AbsPath(p).exists).toBeFalsy()
+})
+
+test('mkdirs to illegal path via symlink', () => {
+    let p = '/link2/d1'
+    expect(new AbsPath(p).exists).toBeFalsy()
+    expect(() => {new AbsPath(p).mkdirs()}).toThrow()
+    expect(new AbsPath(p).exists).toBeFalsy()
+})
+
 
 test('mockfs({}) adds the current directory', () => {
     mockfs({})
