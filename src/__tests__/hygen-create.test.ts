@@ -2,6 +2,7 @@
 import {HygenCreate, HygenCreateError, HygenCreateSession} from "../hygen-create"
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
+import { AbsPath } from "../path_helper";
 
 // Prepare hygen_create.ts for inclusion in the mocked filesystem
 // so that exceptions are displayed properly by jest
@@ -34,7 +35,8 @@ beforeEach(async () => {
             },
             'another_file' : 'just some text',
             'dist' : {}
-        }
+        },
+        '/out' : {}
     }
     simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.1.0", extra: 1, files_and_dirs: ['f1','f2','f3']})
     simfs[`/active_project/${HygenCreate.default_session_file_name}.high_version`] = JSON.stringify({hygen_create_version: "100.0.0", extra: 1})
@@ -319,3 +321,48 @@ describe('additional tests', () => {
     })
 })
 
+describe('generating', () => {
+    function add_and_generate() {
+        let source_path = '/newproj'
+        let hpg = new HygenCreate()
+        expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
+        expect(() => {hpg.startSession('testgen')}).not.toThrow()
+    
+        expect(() => {hpg.add(['/newproj/just_a_file.txt'])}).not.toThrow()
+        
+        if ( hpg.session == null ) {
+            expect(hpg.session).not.toBeNull()
+            return
+        }
+        
+        hpg.useName('name')
+        hpg.generate(false)
+    }
+    test('using an absolute path', () => {
+        expect(new AbsPath('/out').isDir).toBeTruthy()
+        
+        process.env['HYGEN_CREATE_TMPLS'] = '/out'
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        add_and_generate()
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+    })
+
+    test('using a relative path', () => {
+        expect(new AbsPath('/out').isDir).toBeTruthy()
+        
+        process.chdir('/test')
+        process.env['HYGEN_CREATE_TMPLS'] = '../out'
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        add_and_generate()
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+    })
+
+    test('path not set', () => {
+        expect(new AbsPath('/out').isDir).toBeTruthy()
+        
+        delete(process.env['HYGEN_CREATE_TMPLS'])
+        expect(() => { add_and_generate()}).toThrow(/HYGEN_CREATE_TMPLS/)
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+    })
+})

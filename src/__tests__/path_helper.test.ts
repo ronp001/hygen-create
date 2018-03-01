@@ -15,7 +15,10 @@ let simfs = new MockFSHelper({
         'symlink_to_file1': mockfs.symlink({ path: 'file1 '}),
         'f' : "f in /",
         'inner' : {
-            'file-in-inner': 'this is root/inner/file-in-inner'
+            'file-in-inner': 'this is /base/inner/file-in-inner'
+        },
+        'inner2' : {
+            'file-in-inner2': 'this is /base/inner2/file-in-inner2'
         }
     },
     '/dir1' : {
@@ -170,6 +173,19 @@ test('relativeTo', () => {
     expect(ph.relativeTo(new AbsPath('/dir2'), true)).toBeNull()
 })
 
+test('creating from relative path', () => {
+    process.chdir('/base/inner')
+    expect(new AbsPath('/').abspath).toEqual('/')
+    expect(new AbsPath('..').abspath).toEqual('/base')
+    expect(new AbsPath('../inner2').abspath).toEqual('/base/inner2')
+    process.chdir('/base')    
+    expect(new AbsPath('inner2').abspath).toEqual('/base/inner2')
+    expect(new AbsPath('./inner2').abspath).toEqual('/base/inner2')
+    expect(new AbsPath('.').abspath).toEqual('/base')
+    expect(new AbsPath('./').abspath).toEqual('/base/')
+    expect(new AbsPath('.//').abspath).toEqual('/base/')
+    expect(new AbsPath('/inner2').abspath).toEqual('/inner2')
+})
 
 test('containsFile', () => {
     let ph = new AbsPath('/base');

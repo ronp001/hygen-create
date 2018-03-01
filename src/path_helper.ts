@@ -67,7 +67,7 @@ export class AbsPath {
             if ( path.isAbsolute(from)) {
                 this.abspath = path.normalize(from)
             } else {
-                throw new Error(`not an absolute path (${from})`)
+                this.abspath = path.normalize(path.join(process.cwd(), from))
             }
         }
     }
