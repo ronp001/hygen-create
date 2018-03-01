@@ -209,7 +209,7 @@ console.log("Hola!")
 ```
 
 You may have noticed that to run this we used `npm run hola` rather than `npm run hello`. 
-This is because `package.json` create by the `greeter generator` looks like this:
+This is because `package.json` created by the `greeter generator` looks like this:
 
 ```json
 {
@@ -233,7 +233,7 @@ $ ls
 dist/  hygen-create.json  package.json
 ```
 
-As a result, if run `hygen-create status` we'll see that the generated files are already
+So if we run `hygen-create status` here, we'll see that the generated files are already
 included, and the `hygen-create usename <string>` value and generator name are already set:
 
 ```
@@ -249,7 +249,7 @@ The following files are included in the generator:
 Target dir: /tmp/_templates/greeter
 ```
 
-So we can make changes to the generated project and immediately turn those into an updated
+This way we can make changes to the generated project and immediately turn those into an updated
 version of the generator.  For example, let's make a slight modification to `dist/hola.js`:
 
 ```
@@ -275,7 +275,7 @@ $ hygen-create rename greeter2
 
 Now we can run:
 ```
-$ hygen-create g
+$ hygen-create generate
 target path:  /tmp/_templates
 generating: /tmp/_templates/greeter2/new/hygen-create.json.ejs.t
 generating: /tmp/_templates/greeter2/new/package.json.ejs.t

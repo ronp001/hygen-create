@@ -118,6 +118,9 @@ export class HygenCreate {
      *                  if no session file found this is where a new one should be created if necessary
      * 
      *                  if file: path to a session file
+     * 
+     * @returns true if existing session file loaded, false if not
+     * @throws error if encountered problem trying to load the file
      */
     public setPathAndLoadSessionIfExists(for_path: string) : boolean {
         this.debug("HygenCreate starting:", for_path)
