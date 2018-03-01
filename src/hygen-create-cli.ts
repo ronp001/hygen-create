@@ -70,6 +70,12 @@ export default class HygenCreateCli extends CliApp {
         .description("set <name> as the templatization param")
         .action(this.action(this.usename))
 
+        program.command('setopt')
+        .description("configure options for the generator")
+        .option('--gen-parent-dir', "the resulting generator will create a parent directory (using the hygen --name param)")
+        .option('--no-parent-dir', "the resulting generator will not create a parent directory for the content")
+        .action(this.action(this.setopt))
+
         //-------------------------
         // Info commands
         //-------------------------
@@ -88,6 +94,20 @@ export default class HygenCreateCli extends CliApp {
         .option('-f, --force', "overwrite generator files even if they exist")
         .action(this.action(this.generate));
         
+    }
+
+    private setopt(options:any) {
+        if ( this.hgc.session == null ) throw new HygenCreateError.NoSessionInProgress
+
+        if ( options.genParentDir == true) {
+            this.hgc.session.gen_parent_dir = true
+            console.log("parent dir generation is now on")
+        } else if ( options.parentDir == false ) {
+            this.hgc.session.gen_parent_dir = false
+            console.log("parent dir generation is now off")
+        } else {
+            console.log("no options specified")
+        }
     }
 
     private start(name: string, options:any) {

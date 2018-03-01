@@ -4,6 +4,8 @@ import chalk from 'chalk'
 import * as fs from 'fs'
 import * as path from 'path'
 
+const APP_VERSION = "0.2.0"
+
 export class HygenCreateError extends Error {
     constructor(public msg: string) {super(msg)}
     public get message() { return "hygen-create - " + this.msg }
@@ -20,7 +22,7 @@ export namespace HygenCreateError {
     export class NoSuchPath extends HygenCreateError { constructor(file:string|null) { super(`can't find path ${file}`)  } }
     export class FileNotFound extends HygenCreateError { constructor(file:string|null) { super(`file not found: ${file}`)  } }
     export class InvalidSessionFile extends HygenCreateError { constructor(file:string|null) { super(`invalid session file -- [${file}]`)  } }
-    export class InvalidSessionFileVersion extends HygenCreateError { constructor(file:string|null, version:number) { super(`invalid session file version (${version})-- ${file}`)  } }
+    export class InvalidSessionFileVersion extends HygenCreateError { constructor(file:string|null, version:number) { super(`session file version too high (${version}) -- ${file}: consider upgrading hygen-create`)  } }
     export class TryingToStartSessionWithoutPath extends HygenCreateError { constructor() { super(`session can only be started after valid path is set`)  } }
     export class AddedFileMustBeUnderBaseDir extends HygenCreateError { constructor(file:string, basedir: string) { super(`cannot add ${file} - not under base dir (${basedir})`) } }
 }
@@ -29,10 +31,11 @@ export interface FilesHash { [key: string] : boolean }
 
 export class HygenCreateSession {
     about: string = "This is a hygen-create definitions file. The hygen-create utility creates generators that can be executed using hygen."
-    hygen_create_version: string = "0.1.0"
+    hygen_create_version: string = APP_VERSION
     name: string = ""
     files_and_dirs: FilesHash = {}
     templatize_using_name: string | null = null
+    gen_parent_dir: boolean = false
     extra? : any
 
     public static arrayToFilesHash(arr:Array<string>) : FilesHash {
@@ -60,6 +63,8 @@ export class HygenCreate {
     private session_file_path : AbsPath = new AbsPath(null)
     private session_base_dir : AbsPath = new AbsPath(null)
     private orig_session_json : string = ""  // used to check if the state was changed and needs saving
+
+    public loaded_session_version : Array<number> | null = null
 
     public get targetDirForGenerators() : AbsPath {
         return new AbsPath(process.env.HYGEN_CREATE_TMPLS)
@@ -96,6 +101,7 @@ export class HygenCreate {
     
     private output : (...args:any[])=>void = console.log
     private debug : (...args:any[])=>void = this.noOutput
+    // private debug : (...args:any[])=>void = this.output
 
     public set outputFunc(out_func : (...args:any[])=>void) {
         this.output = out_func
@@ -154,9 +160,10 @@ export class HygenCreate {
                 }
                 throw new HygenCreateError.InvalidSessionFile(p.abspath)
             }
-            if ( version[0] > 0 || version[1] > 1 ) {
+            if ( version[0] > 0 || version[1] > 2 ) {
                 throw new HygenCreateError.InvalidSessionFileVersion(p.abspath, version)
             }
+            this.loaded_session_version = version
 
             // convert arrays to hashes if necessary
             if(sessionfile_contents.files_and_dirs instanceof Array) {
@@ -165,9 +172,18 @@ export class HygenCreate {
                         
             // create the session object
             this.session = Object.assign(new HygenCreateSession, sessionfile_contents)
+            if ( this.session == null ) {
+                throw new HygenCreateError.InvalidSessionFile(p.abspath)
+            }
+
+            this.orig_session_json = JSON.stringify(this.session)
+            
+            if ( version[0] == 0 && version[1] == 1 && !this.session.gen_parent_dir ) { // backwards compatibility
+                this.session.gen_parent_dir = true
+                this.output(chalk.red("Note: the session was started using hygen-create v0.1.x.  Parent dir generation is turned on for compatibility.\nUse 'hygen-create setopt --no-parent-dir' to turn off"))
+            }
             this.session_file_path = p
             this.session_base_dir = p.parent
-            this.orig_session_json = JSON.stringify(this.session)
             return true
         } else if ( p.isDir ) {
             this.session_base_dir = p
@@ -200,8 +216,9 @@ export class HygenCreate {
      * @returns true if session required saving, false otherwise
      */
     public saveSessionIfActiveAndChanged() : boolean {
-        if ( this.doesSessionNeedSaving ) {
+        if ( this.session && this.doesSessionNeedSaving ) {
             this.debug("saving session")
+            this.session.hygen_create_version = APP_VERSION
             this.session_file_path.saveStrSync(JSON.stringify(this.session,null,2))
             return true
         }
@@ -346,7 +363,7 @@ export class HygenCreate {
             using_name = this.session.templatize_using_name
         }
         let abspath = this.fileAbsPathFromRelPath(relpath)
-        let tinfo = Templatizer.process(relpath, abspath, using_name)
+        let tinfo = Templatizer.process(relpath, abspath, using_name, this.session.gen_parent_dir)
         return tinfo
     }
 
@@ -355,6 +372,11 @@ export class HygenCreate {
         if ( this.session.templatize_using_name == null ) throw new HygenCreateError.FromNameNotDefined
 
         return this.getTemplatesUsingName(this.session.templatize_using_name)
+    }
+
+    public setGenParentDir(value:boolean) {
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        this.session.gen_parent_dir = value
     }
 
     public useName(name:string) {

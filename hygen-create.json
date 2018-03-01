@@ -1,6 +1,6 @@
 {
   "about": "definitions for turning this project into a reusable template using hygen-create",
-  "hygen_create_version": "0.1.0",
+  "hygen_create_version": "0.2.0",
   "name": "hyper",
   "files_and_dirs": {
     ".gitignore": true,
@@ -24,6 +24,7 @@
     ".travis.yml": true
   },
   "templatize_using_name": "HygenCreate",
+  "gen_parent_dir": true,
   "using_name": "ledger",
   "word_conversions": {}
 }

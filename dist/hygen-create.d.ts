@@ -55,6 +55,7 @@ export declare class HygenCreateSession {
     name: string;
     files_and_dirs: FilesHash;
     templatize_using_name: string | null;
+    gen_parent_dir: boolean;
     extra?: any;
     static arrayToFilesHash(arr: Array<string>): FilesHash;
 }
@@ -71,6 +72,7 @@ export declare class HygenCreate {
     private session_file_path;
     private session_base_dir;
     private orig_session_json;
+    loaded_session_version: Array<number> | null;
     readonly targetDirForGenerators: AbsPath;
     readonly targetDirForGenerator: AbsPath;
     readonly fileCount: number;
@@ -100,6 +102,9 @@ export declare class HygenCreate {
      *                  if no session file found this is where a new one should be created if necessary
      *
      *                  if file: path to a session file
+     *
+     * @returns true if existing session file loaded, false if not
+     * @throws error if encountered problem trying to load the file
      */
     setPathAndLoadSessionIfExists(for_path: string): boolean;
     /**
@@ -150,6 +155,7 @@ export declare class HygenCreate {
      */
     getTemplate(relpath: string, using_name: string | null): TemplateInfo;
     readonly templates: Array<TemplateInfo>;
+    setGenParentDir(value: boolean): void;
     useName(name: string): void;
     paramInfo(param: string | null): string;
     fileAbsPathFromRelPath(relpath: string): AbsPath;

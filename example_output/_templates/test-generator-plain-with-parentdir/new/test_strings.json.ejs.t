@@ -1,5 +1,5 @@
 ---
-to: test_strings.json
+to: <%= name %>/test_strings.json
 ---
 {
     "about this file": [

@@ -38,7 +38,7 @@ beforeEach(async () => {
         },
         '/out' : {}
     }
-    simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.1.0", extra: 1, files_and_dirs: ['f1','f2','f3']})
+    simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.2.0", extra: 1, files_and_dirs: ['f1','f2','f3']})
     simfs[`/active_project/${HygenCreate.default_session_file_name}.high_version`] = JSON.stringify({hygen_create_version: "100.0.0", extra: 1})
     
     simfs[`/project2/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.1.0"})
@@ -117,7 +117,7 @@ describe('Creating sessions', () => {
     
         let contents = fs.readFileSync(`/newproj/${HygenCreate.default_session_file_name}`)
         let parsed = JSON.parse(contents.toString()) as HygenCreateSession
-        expect(parsed.hygen_create_version).toEqual("0.1.0")
+        expect(parsed.hygen_create_version).toEqual("0.2.0")
     })
 })
 
@@ -241,7 +241,7 @@ describe('Adding files, directories and symlinks', () => {
 })
 
 describe('templatizations', () => {
-    test('template for an included file', () => {
+    test('template for an included file when gen_parent_dir specified', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
         
@@ -250,11 +250,31 @@ describe('templatizations', () => {
             expect(hpg.session).not.toBeNull()
         } else {
             hpg.useName('pkg1')
+            hpg.session.gen_parent_dir = true
             let tpl = hpg.getTemplateTextFor('package.json').split('\n')
             let l=0
             expect(tpl.length).toEqual(4)
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('to: <%= name %>/package.json')
+            expect(tpl[l++]).toEqual('---')
+            expect(tpl[l++]).toEqual('{"name":"<%= name.toLowerCase() %>"}')
+        }
+    })
+    test('template for an included file when gen_parent_dir not specified', () => {
+        let hpg = new HygenCreate();
+        hpg.setPathAndLoadSessionIfExists('/project2')
+        
+        expect(() => {hpg.add(['/project2/package.json'])}).not.toThrow()
+        if ( hpg.session == null ) {
+            expect(hpg.session).not.toBeNull()
+        } else {
+            hpg.useName('pkg1')
+            hpg.session.gen_parent_dir = false
+            let tpl = hpg.getTemplateTextFor('package.json').split('\n')
+            let l=0
+            expect(tpl.length).toEqual(4)
+            expect(tpl[l++]).toEqual('---')
+            expect(tpl[l++]).toEqual('to: package.json')
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('{"name":"<%= name.toLowerCase() %>"}')
         }
@@ -319,6 +339,24 @@ describe('additional tests', () => {
             expect(info[1].included).toBeTruthy()
         }        
     })
+})
+
+describe('gen_parent_dir', () => {
+    test('default value when loading 0.2.0 file', () => {
+        let source_path = new AbsPath('/newproj')
+        let hpg = new HygenCreate()
+        source_path.add('hygen-create.json').saveStrSync(JSON.stringify({hygen_create_version: '0.2.0'}))
+        expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeTruthy()
+        expect(hpg.session.gen_parent_dir).toBeFalsy()        
+    })
+    test('default value when loading 0.1.0 file', () => {
+        let source_path = new AbsPath('/newproj')
+        let hpg = new HygenCreate()
+        source_path.add('hygen-create.json').saveStrSync(JSON.stringify({hygen_create_version: '0.1.0'}))
+        expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeTruthy()
+        expect(hpg.session.gen_parent_dir).toBeTruthy()
+    })
+
 })
 
 describe('generating', () => {
