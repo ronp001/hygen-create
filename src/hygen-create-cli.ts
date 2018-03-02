@@ -331,6 +331,14 @@ export default class HygenCreateCli extends CliApp {
                 console.log(chalk.red("Generator name not set (use hygen-create rename <name> to set it)"))
             }    
             console.log("")
+
+
+            if ( this.hgc.session.gen_parent_dir ) {
+                console.log(`Parent dir generation: ON  (the generator will create a <name> directory as parent for the content)`)
+            } else {
+                console.log("Parent dir generation: OFF (the generator will add content to the current directory)")
+            }
+            console.log("")
         }
  
     }
