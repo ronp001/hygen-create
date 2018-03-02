@@ -18,7 +18,7 @@ export namespace HygenCreateError {
     export class SessionInProgress extends HygenCreateError { constructor() { super("hygen-create session already in progress")  } }
     export class NothingToGenerate extends HygenCreateError { constructor() { super("nothing to generate")  } }
     export class NoFilesAdded extends HygenCreateError { constructor() { super("no files added")  } }
-    export class TargetPathNotSet extends HygenCreateError { constructor() { super("target path for templates not set (use 'export HYGEN_CREATE_TMPLS=')")  } }
+    export class TargetPathNotSet extends HygenCreateError { constructor(reason:string) { super(`no target path for generator: ${reason}`)  } }
     export class NoSuchPath extends HygenCreateError { constructor(file:string|null) { super(`can't find path ${file}`)  } }
     export class FileNotFound extends HygenCreateError { constructor(file:string|null) { super(`file not found: ${file}`)  } }
     export class InvalidSessionFile extends HygenCreateError { constructor(file:string|null) { super(`invalid session file -- [${file}]`)  } }
@@ -66,9 +66,38 @@ export class HygenCreate {
 
     public loaded_session_version : Array<number> | null = null
 
-    public get targetDirForGenerators() : AbsPath {
-        return new AbsPath(process.env.HYGEN_CREATE_TMPLS)
+    public get targetDirWithInfo() : {using: string, path: AbsPath} {
+        let tried = [];
+
+        for ( let entry of [
+                {using: "HYGEN_CREATE_TMPLS", value: process.env.HYGEN_CREATE_TMPLS},
+                {using: "HYGEN_TMPLS", value: process.env.HYGEN_TMPLS},
+                {using: "local dir", value: './_templates'}
+        ]) {
+            if ( entry.value ) {
+                let ap = new AbsPath(entry.value)
+                if ( ap.isDir ) {
+                    return {using: `using ${entry.using} -- ${tried.join(",")}`, path: ap}
+                } else if ( ap.exists ) {
+                    tried.push(`${entry.using} (${entry.value}) exists but is not a directory`)
+                } else {
+                    tried.push(`${entry.using} (${entry.value}) does not exist`)
+                }
+            } else {
+                tried.push(`${entry.using} not set`)
+            }
+        }
+        return {using: tried.join(", "), path: new AbsPath(null)}
     }
+
+    public get targetDirForGenerators() : AbsPath {
+        return this.targetDirWithInfo.path
+    }
+
+    public get targetDirForGeneratorsReason() : string {
+        return this.targetDirWithInfo.using
+    }
+
     public get targetDirForGenerator() : AbsPath {
         if ( this.session == null ) return new AbsPath(null)
         if ( this.session.name == "" ) return new AbsPath(null)
@@ -450,7 +479,7 @@ export class HygenCreate {
     public generate(force:boolean = false) {
         if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         if ( this.fileCount == 0 ) throw new HygenCreateError.NothingToGenerate  
-        if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet
+        if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet(this.targetDirForGeneratorsReason)
         
         this.output("target path: ", this.targetDirForGenerators.toString())
         
@@ -463,7 +492,7 @@ export class HygenCreate {
     
     public generateTemplateForFile(relpath: string, force: boolean = false) {
         if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
-        if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet
+        if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet(this.targetDirForGeneratorsReason)
 
         let input_file = this.fileAbsPathFromRelPath(relpath)
 

@@ -322,10 +322,10 @@ export default class HygenCreateCli extends CliApp {
             if ( this.hgc.session.name ) {
                 if ( this.hgc.targetDirForGenerators.isSet ) {
                     console.log(chalk.green(`Target dir: ${this.hgc.targetDirForGenerators.add(this.hgc.session.name).abspath}`) +  
-                                            (program.verbose ? chalk.gray(`  HYGEN_CREATE_TMPLS=${this.hgc.targetDirForGenerators.abspath}`) : "") 
+                                            (chalk.gray(`  ${this.hgc.targetDirForGeneratorsReason}`)) 
                                         )
                 } else {
-                    console.log(chalk.red("Target template dir not set (export HYGEN_CREATE_TMPLS= to set it)"))
+                    console.log(chalk.red(`No target dir: ${this.hgc.targetDirForGeneratorsReason}`))
                 }
             } else {
                 console.log(chalk.red("Generator name not set (use hygen-create rename <name> to set it)"))
@@ -334,9 +334,9 @@ export default class HygenCreateCli extends CliApp {
 
 
             if ( this.hgc.session.gen_parent_dir ) {
-                console.log(`Parent dir generation: ON  (the generator will create a <name> directory as parent for the content)`)
+                console.log(`Parent dir generation: ON  (the resulting generator will create a <name> directory as parent for the content)`)
             } else {
-                console.log("Parent dir generation: OFF (the generator will add content to the current directory)")
+                console.log("Parent dir generation: OFF (the resulting generator will add content to the current directory)")
             }
             console.log("")
         }

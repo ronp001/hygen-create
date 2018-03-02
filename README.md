@@ -38,7 +38,7 @@ There are several steps to generating a generator:
 1. `hygen-create add <file> ...` to select files to be templatized for the generator.
 1. `hygen-create usename <name>` to indicate which word to replace with placeholders (of the <%= name %> family):  (Note: it's currently highly recommended to use a CamelCased value - see [limitations](#limitations))
 1. (optionally) `hygen-create status` to view information about replacements to be made
-1. Make sure you `export HYGEN_CREATE_TMPLS=<path>` to specify the target ```hygen``` _templates folder
+1. [Specify](#target templates folder) the target ```hygen``` _templates folder
 1. `hygen-create generate` to generate the new generator
 
 The result:  a new ```hygen``` generator will be created.  You can now use ```hygen <generator-name> new --name <target-name>``` to use your new generator.
@@ -148,9 +148,9 @@ The following files are included in the generator:
 [included] - package.json [3 lines parameterized]
 [included] - dist/hello.js [2 lines parameterized]
 
-Target template dir not set (export HYGEN_CREATE_TMPLS= to set it)
+No target dir: HYGEN_CREATE_TMPLS not set, HYGEN_TMPLS not set, local dir (./_templates) does not exist
 
-Parent dir generation: OFF (the generator will add content to the current directory)
+Parent dir generation: OFF (the resulting generator will add content to the current directory)
 ```
 
 If we'd like to see how our files will be templatized, we can use `hygen-create status -v <file>` to check that out.
@@ -251,7 +251,7 @@ The following files are included in the generator:
 
 Target dir: /tmp/_templates/greeter
 
-Parent dir generation: OFF (the generator will add content to the current directory)
+Parent dir generation: OFF (the resulting generator will add content to the current directory)
 ```
 
 This way we can make changes to the generated project and immediately turn those into an updated
@@ -299,10 +299,16 @@ to: dist/<%= name.toLowerCase() %>.js
 console.log("<%= h.capitalize(name) %>! <%= h.capitalize(name) %>!")
 ```
 
+## Configuration and Options
 
-## Options
+### Configuration: setting target _templates directory
 
-Options can be set using the `hygen-create setopt` command. Currently there is only one option.
+`hygen-create` will look for a `hygen` _templates directory in the following order:
+1. env var `HYGEN_CREATE_TMPLS` if set and points to an existing directory
+1. env var `HYGEN__TMPLS` if set and points to an existing directory
+1. an existing `_templates` directory in the current dir
+
+`hygen-create` will not create a _templates directory, and will abort with an error if no such directory is found.
 
 ### Option: parent directory generation
 
@@ -314,9 +320,9 @@ Options can be set using the `hygen-create setopt` command. Currently there is o
   * If `hygen-create` session was initiated using `hygen-create v0.2.0` and up: off
 
 
-**When turned off**: the generator will create contents in the current directory.
+**When turned off**: the resulting generator will create contents in the current directory.
 
-**When turned on**: the generator will create a parent directory for all  contents.  The name of the parent directory will be the value passed in the `--name` option of the generated `hygen` generator.
+**When turned on**: the resulting generator will create a parent directory for all  contents.  The name of the parent directory will be the value passed in the `--name` option of the generated `hygen` generator.
 
 
 Example 1: --no-parent-dir
@@ -337,7 +343,7 @@ $ hygen-create setopt --no-parent-dir
 $ hygen-create generate  # this creates the generator _templates/mygen
 
 # run the generator
-# The result: the generator will create ./file1 (i.e., in the current directory)
+# The result: the resulting generator will create ./file1 (i.e., in the current directory)
 $ hygen mygen new --name hi
 
 Loaded templates: _templates
@@ -362,7 +368,7 @@ $ hygen-create setopt --gen-parent-dir
 $ hygen-create generate  # this creates the generator _templates/mygen
 
 # run the generator
-# The result: the generator will create the dir './hi' and then create ./hi/file1
+# The result: the resulting generator will create the dir './hi' and then create ./hi/file1
 $ hygen mygen new --name hi
 
 Loaded templates: _templates
