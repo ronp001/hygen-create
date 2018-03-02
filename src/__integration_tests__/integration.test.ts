@@ -49,7 +49,7 @@ async function runHygen(hygen_args: string[], template_path: AbsPath, output_pat
     await runner(hygen_args, config)
 }
 
-function runHygenGenerate(source_path:AbsPath, file_repaths:Array<string>, generator_name:string, usename: string) {
+function runHygenGenerate(source_path:AbsPath, file_repaths:Array<string>, generator_name:string, usename: string, gen_parent_dir:boolean) {
     let hpg = new HygenCreate()
     hpg.session_file_name = 'example_session.json'
     expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
@@ -68,6 +68,7 @@ function runHygenGenerate(source_path:AbsPath, file_repaths:Array<string>, gener
     }
     
     hpg.useName(usename)
+    hpg.setGenParentDir(gen_parent_dir)
     hpg.generate(false)
 
     for ( let relpath of file_repaths ) {
@@ -81,20 +82,22 @@ test('simple', async () => {
     let source_path = new AbsPath(__dirname).findUpwards('example', true)
 
     // create a generator using HygenCreate
-    runHygenGenerate(source_path, ['package.json', 'dist/hello.js'], 'greeter', 'hello')
+    runHygenGenerate(source_path, ['package.json', 'dist/hello.js'], 'greeter', 'hello', false)
 
     // run the generator
-    await runHygen(['greeter', 'new', '--name', 'hola'], path_to_templates, path_to_generated)
+    let outdir = path_to_generated.add('hola-greeter')
+    outdir.mkdirs()
+    await runHygen(['greeter', 'new', '--name', 'hola'], path_to_templates, outdir)
 
     // see if the generator created the expected files
-    expect(path_to_generated.add('hola/dist/hola.js').isFile).toBeTruthy()
+    expect(path_to_generated.add('hola-greeter/dist/hola.js').isFile).toBeTruthy()
 })
 
 test.skip('test strings - single word', async () => {
     let source_path = new AbsPath(__dirname).findUpwards('example', true)
 
     // create a generator using HygenCreate
-    runHygenGenerate(source_path, ['test_strings.json'], 'test-generator-single', 'word')
+    runHygenGenerate(source_path, ['test_strings.json'], 'test-generator-single', 'word', false)
 
     // run the generator
     await runHygen(['test-generator-single', 'new', '--name', 'result'], path_to_templates, path_to_generated)
@@ -106,7 +109,7 @@ test.skip('test strings - single word', async () => {
 test.skip('test strings - double word', async () => {
 
     // create a generator using HygenCreate
-    runHygenGenerate(examples_path, ['test_strings.json'], 'test-generator-double', 'DoubleWord')
+    runHygenGenerate(examples_path, ['test_strings.json'], 'test-generator-double', 'DoubleWord', false)
 
     // run the generator
     await runHygen(['test-generator-double', 'new', '--name', 'TheResult'], path_to_templates, path_to_generated)
@@ -118,6 +121,9 @@ test.skip('test strings - double word', async () => {
 test('section: plain', async () => {
     await run_test_strings_file_comparison('plain')
 })
+test('section: plain (generating parent dir)', async () => {
+    await run_test_strings_file_comparison('plain', true)
+})
 test('section: doubled-no-sfx', async () => {
     await run_test_strings_file_comparison('doubled-no-sfx')
 })
@@ -125,7 +131,7 @@ test('section: doubled-with-sfx', async () => {
     await run_test_strings_file_comparison('doubled-with-sfx')
 })
 
-async function run_test_strings_file_comparison(section:string) {
+async function run_test_strings_file_comparison(section:string, gen_parent_dir:boolean = false) {
     let test_strings_path = new AbsPath(__dirname).findUpwards('example', true).add('test_strings.json')
 
     let parsed : any = test_strings_path.contentsFromJSON
@@ -152,15 +158,27 @@ async function run_test_strings_file_comparison(section:string) {
 
     // create a generator using HygenCreate
     let generator_name = `test-generator-${section}`
+    if ( gen_parent_dir ) {
+        generator_name += "-with-parentdir"
+    }
     let usename = defs["hygen-create usename"]
     let hygen_name = defs["hygen --name"]
-    runHygenGenerate(examples_path, ['test_strings.json'], generator_name, usename)
+    runHygenGenerate(examples_path, ['test_strings.json'], generator_name, usename, gen_parent_dir)
 
     // run the generator
-    await runHygen([generator_name, 'new', '--name', hygen_name], path_to_templates, path_to_generated.add(section))
+    let subdir = section
+    if ( !gen_parent_dir ) {
+        subdir += `-${hygen_name}`
+    }
+    await runHygen([generator_name, 'new', '--name', hygen_name], path_to_templates, path_to_generated.add(subdir))
 
     // load the resulting file
-    let generated_file = path_to_generated.add(`${section}/${hygen_name}/test_strings.json`)
+    let generated_file : AbsPath 
+    if ( gen_parent_dir ) {
+        generated_file = path_to_generated.add(`${subdir}/${hygen_name}/test_strings.json`)
+    } else {
+        generated_file = path_to_generated.add(`${subdir}/test_strings.json`)
+    }
     expect(generated_file.isFile).toBeTruthy()
 
     // compare the generated strings to the expected strings

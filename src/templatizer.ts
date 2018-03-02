@@ -12,7 +12,7 @@ export interface ReplacementInfo {
 export class TemplateInfo {
     public is_binary : boolean
 
-    constructor(public relpath: string, public abspath: AbsPath, public using_name: string) {
+    constructor(public relpath: string, public abspath: AbsPath, public using_name: string, public gen_parent_dir: boolean) {
         this.is_binary = abspath.isBinaryFile
     }
 
@@ -26,13 +26,17 @@ export class TemplateInfo {
 
     public get header() : string {
 
+        let target_path_line : string
+
+        if ( this.gen_parent_dir ) {
+            target_path_line = `to: <%= name %>/` + this.target_filename + "\n"
+        } else {
+            target_path_line = `to: ${this.target_filename}\n`
+        }
         
         let header = ""
-
         + "---\n"
-        // + this.getProcessedText(`to: ${this.using_name}`) + `/${this.target_filename}\n`
-        + `to: <%= name %>/` + this.target_filename + "\n"
-        // + `to: <%= name %>/${this.target_filename}\n`
+        + target_path_line
         + "---\n"
         
         return header
@@ -167,8 +171,8 @@ export class TemplateInfo {
 }
 
 export class Templatizer {
-    public static process(relpath: string, abspath:AbsPath, from_name: string) : TemplateInfo {
-        let result = new TemplateInfo(relpath, abspath, from_name)
+    public static process(relpath: string, abspath:AbsPath, from_name: string, gen_parent_dir: boolean) : TemplateInfo {
+        let result = new TemplateInfo(relpath, abspath, from_name, gen_parent_dir)
         result.process()
 
         return result

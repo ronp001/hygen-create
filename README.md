@@ -28,7 +28,7 @@ or
 $ npm install -g hygen-create
 ```
 
-Note that this does NOT install `hygen`. To use the generated generators you must have [hygen](http://www.hygen.io) installed too.
+Note that this does NOT install `hygen`. To use the generators made by hygen-create you must have [hygen](http://www.hygen.io) installed as well.
 
 ## Generating a generator
 
@@ -112,14 +112,15 @@ If we take a look at `hygen-create.json`, we'll see the added files are listed t
 $ cat hygen-create.json 
 {
   "about": "This is a hygen-create definitions file. The hygen-create utility creates generators that can be executed using hygen.",
-  "hygen_create_version": "0.1.0",
+  "hygen_create_version": "0.2.0",
   "name": "greeter",
   "files_and_dirs": {
     "hygen-create.json": true,
     "package.json": true,
     "dist/hello.js": true
   },
-  "templatize_using_name": null
+  "templatize_using_name": null,
+  "gen_parent_dir": false
 }
 ```
 
@@ -140,7 +141,7 @@ We can check the status of the session by typing `hygen-create status`:
 ```
 $ hygen-create status 
 
-Using the string "hello" to templatize files (Change using 'hygen-create usename <name>')
+Using the string "Hello" to templatize files (Change using 'hygen-create usename <name>')
 
 The following files are included in the generator:
 [included] - hygen-create.json [2 lines parameterized]
@@ -148,6 +149,8 @@ The following files are included in the generator:
 [included] - dist/hello.js [2 lines parameterized]
 
 Target template dir not set (export HYGEN_CREATE_TMPLS= to set it)
+
+Parent dir generation: OFF (the generator will add content to the current directory)
 ```
 
 If we'd like to see how our files will be templatized, we can use `hygen-create status -v <file>` to check that out.
@@ -178,23 +181,23 @@ generating: /tmp/_templates/greeter/new/dist_hello.js.ejs.t
 We now have a `hygen` generator called `greeter` that is ready to use. For example, we can run:
 ```
 $ export HYGEN_TMPLS=/tmp/_templates 
-$ mkdir /tmp/dev 
-$ cd /tmp/dev
+$ mkdir /tmp/dev/hola-greeter
+$ cd /tmp/dev/hola-greeter
 $ hygen greeter new --name Hola
 
 Loaded templates: /tmp/_templates
-       added: Hola/dist/hola.js
-       added: Hola/hygen-create.json
-       added: Hola/package.json
+       added: dist/hola.js
+       added: hygen-create.json
+       added: package.json
 ```
 
 This will generate a new app for us, this one printing `Hola!` instead of `Hello!`:
 
 ```
-$ cd Hola
+$ cd hola-greeter
 $ npm run hola
 
-> hola@1.0.0 hola /private/tmp/dev/Hola
+> hola@1.0.0 hola /private/tmp/dev/hola-greeter
 > node dist/hola.js
 
 Hola!
@@ -239,7 +242,7 @@ included, and the `hygen-create usename <string>` value and generator name are a
 ```
 $ hygen-create status
 
-Using the string "hola" to templatize files (Change using 'hygen-create usename <name>')
+Using the string "Hola" to templatize files (Change using 'hygen-create usename <name>')
 
 The following files are included in the generator:
 [included] - hygen-create.json [2 lines parameterized]
@@ -247,6 +250,8 @@ The following files are included in the generator:
 [included] - dist/hola.js [2 lines parameterized]
 
 Target dir: /tmp/_templates/greeter
+
+Parent dir generation: OFF (the generator will add content to the current directory)
 ```
 
 This way we can make changes to the generated project and immediately turn those into an updated
@@ -262,13 +267,13 @@ Test our changes:
 ```
 $ npm run hola
 
-> hola@1.0.0 hola /private/tmp/dev/Hola
+> hola@1.0.0 hola /private/tmp/dev/hola-greeter
 > node dist/hola.js
 
 Hola! Hola!
 ```
 
-And run `hygen-create` again - although we'll want to change the name of the generated generator by running:
+And run `hygen-create` again - although we'll want to change the name of the created generator by running:
 ```
 $ hygen-create rename greeter2
 ```
@@ -288,10 +293,81 @@ to the project have been reflected in the new `greeter2` generator:
 ```
 $ cat /tmp/_templates/greeter2/new/dist_hola.js.ejs.t
 ---
-to: <%= name %>/dist/<%= name.toLowerCase() %>.js
+to: dist/<%= name.toLowerCase() %>.js
 ---
 // This is the improved <%= name.toLowerCase() %>.js
 console.log("<%= h.capitalize(name) %>! <%= h.capitalize(name) %>!")
+```
+
+
+## Options
+
+Options can be set using the `hygen-create setopt` command. Currently there is only one option.
+
+### Option: parent directory generation
+
+* Turning on:  `hygen-create setopt --gen-parent-dir`
+* Turning off: `hygen-create setopt --no-parent-dir`
+* .json file field:  `"gen_parent_dir" (boolean)`
+* Default: 
+  * If `hygen-create` session was initiated using `hygen-create v0.1.x`: on
+  * If `hygen-create` session was initiated using `hygen-create v0.2.0` and up: off
+
+
+**When turned off**: the generator will create contents in the current directory.
+
+**When turned on**: the generator will create a parent directory for all  contents.  The name of the parent directory will be the value passed in the `--name` option of the generated `hygen` generator.
+
+
+Example 1: --no-parent-dir
+```bash
+# start the session
+$ hygen-create start mygen
+
+# add a file
+$ hygen-create add file1       
+
+# specify name to templatize
+$ hygen-create usename xyz
+
+# ensure parent-dir generation is off
+$ hygen-create setopt --no-parent-dir
+
+# create the generator
+$ hygen-create generate  # this creates the generator _templates/mygen
+
+# run the generator
+# The result: the generator will create ./file1 (i.e., in the current directory)
+$ hygen mygen new --name hi
+
+Loaded templates: _templates
+      added: file1
+```
+
+Example 2: --gen-parent-dir
+```bash
+# start the session
+$ hygen-create start mygen
+
+# add a file
+$ hygen-create add file1       
+
+# specify name to templatize
+$ hygen-create usename xyz
+
+# ensure parent-dir generation is off
+$ hygen-create setopt --gen-parent-dir
+
+# create the generator
+$ hygen-create generate  # this creates the generator _templates/mygen
+
+# run the generator
+# The result: the generator will create the dir './hi' and then create ./hi/file1
+$ hygen mygen new --name hi
+
+Loaded templates: _templates
+      added: hi/file1
+
 ```
 
 
@@ -331,6 +407,7 @@ $ hygen-create
     add <file|dir> [file|dir...]          add files or directories to be templatized
     remove|rm <file|dir> [file|dir...]    do not templatize specified files/directories
     usename <name>                        set <name> as the templatization param
+    setopt [options]                      configure options for the generator
     status|s [options] [file] [files...]  show replacements to be made in (all|specified) files
     generate|g [options]                  generate a generator from the added files
 ```

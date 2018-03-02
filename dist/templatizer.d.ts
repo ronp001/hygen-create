@@ -8,8 +8,9 @@ export declare class TemplateInfo {
     relpath: string;
     abspath: AbsPath;
     using_name: string;
+    gen_parent_dir: boolean;
     is_binary: boolean;
-    constructor(relpath: string, abspath: AbsPath, using_name: string);
+    constructor(relpath: string, abspath: AbsPath, using_name: string, gen_parent_dir: boolean);
     readonly template_filename: string;
     readonly target_filename: string;
     readonly header: string;
@@ -26,6 +27,6 @@ export declare class TemplateInfo {
     processLine(line: string, num: number): ReplacementInfo | null;
 }
 export declare class Templatizer {
-    static process(relpath: string, abspath: AbsPath, from_name: string): TemplateInfo;
+    static process(relpath: string, abspath: AbsPath, from_name: string, gen_parent_dir: boolean): TemplateInfo;
     static template_filename(relpath: string): string;
 }

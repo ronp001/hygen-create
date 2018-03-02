@@ -1,6 +1,3 @@
----
-to: test_strings.json
----
 {
     "about this file": [
         "This file is used by src/__integration_tests__/integration.test.ts",
@@ -22,18 +19,18 @@ to: test_strings.json
     ],
     "plain": {
         "defs": {
-            "hygen-create usename": "<%= name.toLowerCase() %>",
+            "hygen-create usename": "result",
             "hygen --name": "result"
         },
         "comparisons": {
-            "plain": ["<%= name.toLowerCase() %>", "result"],
-            "capitalized": ["<%= h.capitalize(name) %>", "Result"],
-            "allcaps": ["<%= name.toUpperCase() %>", "RESULT"],
-            "with_preceding_underscore": ["_<%= name.toLowerCase() %>", "_result"],
-            "with_preceding_underscore_capitalized": ["_<%= h.capitalize(name) %>", "_Result"],
-            "with_preceding_dash": ["-<%= name.toLowerCase() %>", "-result"],
-            "with_preceding_dash_capitalized": ["-<%= h.capitalize(name) %>", "-Result"],
-            "with_preceding_<%= name.toLowerCase() %>_capitalized": ["ClsWord","ClsWord", "not converted"]
+            "plain": ["result", "result"],
+            "capitalized": ["Result", "Result"],
+            "allcaps": ["RESULT", "RESULT"],
+            "with_preceding_underscore": ["_result", "_result"],
+            "with_preceding_underscore_capitalized": ["_Result", "_Result"],
+            "with_preceding_dash": ["-result", "-result"],
+            "with_preceding_dash_capitalized": ["-Result", "-Result"],
+            "with_preceding_result_capitalized": ["ClsWord","ClsWord", "not converted"]
         }
     },
     "doubled-no-sfx": {
@@ -42,14 +39,14 @@ to: test_strings.json
             "hygen --name": "TheResult"
         },
         "comparisons": {
-            "underscore": ["double_<%= name.toLowerCase() %>","the_result"],
-            "underscore_with_preceding_underscore": ["_double_<%= name.toLowerCase() %>","_the_result"],
+            "underscore": ["double_result","the_result"],
+            "underscore_with_preceding_underscore": ["_double_result","_the_result"],
             "camelcased": ["DoubleWord","TheResult"],
             "camelcased_with_preceding_underscore": ["_DoubleWord", "_TheResult"],
             "camelcased_lowerfirst": ["doubleWord", "theResult"],
-            "dashed": ["double-<%= name.toLowerCase() %>", "the-result"],
-            "dashed_with_preceding_dash": ["-double-<%= name.toLowerCase() %>", "-the-result"],
-            "underscore_all_caps": ["DOUBLE_<%= name.toUpperCase() %>", "THE_RESULT"]
+            "dashed": ["double-result", "the-result"],
+            "dashed_with_preceding_dash": ["-double-result", "-the-result"],
+            "underscore_all_caps": ["DOUBLE_RESULT", "THE_RESULT"]
         }
     },
     "doubled-with-sfx": {
@@ -58,14 +55,14 @@ to: test_strings.json
             "hygen --name": "TheResult"
         },
         "comparisons": {
-            "underscore": ["double_<%= name.toLowerCase() %>_with_sfx","the_result_with_sfx"],
-            "underscore_with_preceding_underscore": ["_double_<%= name.toLowerCase() %>_with_sfx","_the_result_with_sfx"],
+            "underscore": ["double_result_with_sfx","the_result_with_sfx"],
+            "underscore_with_preceding_underscore": ["_double_result_with_sfx","_the_result_with_sfx"],
             "camelcased": ["DoubleWordWithSfx","TheResultWithSfx"],
             "camelcased_with_preceding_underscore": ["_DoubleWordWithSfx","_TheResultWithSfx"],
             "camelcased_lowerfirst": ["doubleWordWithSfx","theResultWithSfx"],
-            "dashed": ["double-<%= name.toLowerCase() %>-with-sfx","the-result-with-sfx"],
-            "dashed_with_preceding_dash": ["-double-<%= name.toLowerCase() %>-with-sfx","-the-result-with-sfx"],
-            "underscore_all_caps": ["DOUBLE_<%= name.toUpperCase() %>_WITH_SFX","THE_RESULT_WITH_SFX"]
+            "dashed": ["double-result-with-sfx","the-result-with-sfx"],
+            "dashed_with_preceding_dash": ["-double-result-with-sfx","-the-result-with-sfx"],
+            "underscore_all_caps": ["DOUBLE_RESULT_WITH_SFX","THE_RESULT_WITH_SFX"]
         }
     }
 }

@@ -1,5 +1,5 @@
 ---
-to: <%= name %>/package.json
+to: package.json
 ---
 {
   "name": "<%= name.toLowerCase() %>",

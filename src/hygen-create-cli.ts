@@ -70,6 +70,12 @@ export default class HygenCreateCli extends CliApp {
         .description("set <name> as the templatization param")
         .action(this.action(this.usename))
 
+        program.command('setopt')
+        .description("configure options for the generator")
+        .option('--gen-parent-dir', "the resulting generator will create a parent directory (using the hygen --name param)")
+        .option('--no-parent-dir', "the resulting generator will not create a parent directory for the content")
+        .action(this.action(this.setopt))
+
         //-------------------------
         // Info commands
         //-------------------------
@@ -88,6 +94,20 @@ export default class HygenCreateCli extends CliApp {
         .option('-f, --force', "overwrite generator files even if they exist")
         .action(this.action(this.generate));
         
+    }
+
+    private setopt(options:any) {
+        if ( this.hgc.session == null ) throw new HygenCreateError.NoSessionInProgress
+
+        if ( options.genParentDir == true) {
+            this.hgc.session.gen_parent_dir = true
+            console.log("parent dir generation is now on")
+        } else if ( options.parentDir == false ) {
+            this.hgc.session.gen_parent_dir = false
+            console.log("parent dir generation is now off")
+        } else {
+            console.log("no options specified")
+        }
     }
 
     private start(name: string, options:any) {
@@ -310,6 +330,14 @@ export default class HygenCreateCli extends CliApp {
             } else {
                 console.log(chalk.red("Generator name not set (use hygen-create rename <name> to set it)"))
             }    
+            console.log("")
+
+
+            if ( this.hgc.session.gen_parent_dir ) {
+                console.log(`Parent dir generation: ON  (the generator will create a <name> directory as parent for the content)`)
+            } else {
+                console.log("Parent dir generation: OFF (the generator will add content to the current directory)")
+            }
             console.log("")
         }
  
