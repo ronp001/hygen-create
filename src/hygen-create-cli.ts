@@ -91,7 +91,7 @@ export default class HygenCreateCli extends CliApp {
         program.command('generate')
         .alias('g')
         .description("generate a generator from the added files")
-        .option('-f, --force', "overwrite generator files even if they exist")
+        // .option('-f, --force', "overwrite generator files even if they exist")
         .action(this.action(this.generate));
         
     }

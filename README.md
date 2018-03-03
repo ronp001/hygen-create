@@ -278,6 +278,9 @@ And run `hygen-create` again - although we'll want to change the name of the cre
 $ hygen-create rename greeter2
 ```
 
+(Note that if we do not manually change the name of the target generator, `hygen-create` will 
+[automatically rename](#previous-versions-of-generators) the previous version)
+
 Now we can run:
 ```
 $ hygen-create generate
@@ -315,11 +318,11 @@ Note that a new version will not be created if the generator is identical to the
 ### Setting target templates directory
 
 `hygen-create` will look for a `hygen` _templates directory in the following order:
-1. env var `HYGEN_CREATE_TMPLS` if set and points to an existing directory
-1. env var `HYGEN__TMPLS` if set and points to an existing directory
-1. an existing `_templates` directory in the current dir
+1. The `HYGEN_CREATE_TMPLS` environment variable - if set and points to an existing directory
+1. The `HYGEN_TMPLS` environment variable - if set and points to an existing directory
+1. An existing `_templates` directory in the current dir
 
-`hygen-create` will not create a _templates directory, and will abort with an error if no such directory is found.
+Note that `hygen-create` will *not* create a _templates directory, and will abort with an error if no such directory is found.
 
 ### Option: parent directory generation
 
