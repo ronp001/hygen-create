@@ -13,7 +13,7 @@ Because creating templates from existing projects is annoying
 `hygen-create` takes a set of existing project files and uses them to create
 `hygen` template files, replacing a selected word with appropriate placeholders (such as <%= name.toLowerCase() %>, <%= h.inflection.camelize(name, true) %>, etc) entries.
 
-The resulting template files can be used as is (using the `hygen <generator> new` command - assuming [hygen](http://www.hygen.io) is installed), or they can be manually edited and changed as desired.
+Assuming [hygen](http://www.hygen.io) is installed, the resulting template files can be used as is (using the `hygen <generator> new` command).  They can also be manually edited and changed as desired before using `hygen` to run them.
 
 
 ## Installation
@@ -38,7 +38,7 @@ There are several steps to generating a generator:
 1. `hygen-create add <file> ...` to select files to be templatized for the generator.
 1. `hygen-create usename <name>` to indicate which word to replace with placeholders (of the <%= name %> family):  (Note: it's currently highly recommended to use a CamelCased value - see [limitations](#limitations))
 1. (Optionally) `hygen-create status` to view information about replacements to be made
-1. (Optionally) [configure](#Configuration:-setting-target-_templates-directory) the target ```hygen``` _templates directory
+1. (Optionally) [configure](#setting-target-templates-directory) the target ```hygen``` _templates directory
 1. `hygen-create generate` to generate the new generator
 
 The result:  a new ```hygen``` generator will be created.  You can now use ```hygen <generator-name> new --name <target-name>``` to use your new generator.
@@ -312,7 +312,7 @@ Note that a new version will not be created if the generator is identical to the
 
 ## Configuration and options
 
-### Configuration: setting target _templates directory
+### Setting target templates directory
 
 `hygen-create` will look for a `hygen` _templates directory in the following order:
 1. env var `HYGEN_CREATE_TMPLS` if set and points to an existing directory
