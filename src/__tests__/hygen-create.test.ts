@@ -395,11 +395,37 @@ describe('generating', () => {
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
     })
 
-    test('path not set', () => {
+    test('using a relative path with HYGEN_TMPLS', () => {
+        expect(new AbsPath('/out').isDir).toBeTruthy()
+        
+        process.chdir('/test')
+        delete(process.env['HYGEN_CREATE_TMPLS'])
+        process.env['HYGEN_TMPLS'] = '../out'
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        add_and_generate()
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+    })
+
+    test('path not set, _templates dir in current dir', () => {
+        expect(new AbsPath('/out').isDir).toBeTruthy()
+        expect(new AbsPath('/out/_templates').isDir).toBeFalsy()
+        new AbsPath('/out/_templates').mkdirs()
+        expect(new AbsPath('/out/_templates').isDir).toBeTruthy()
+        
+        delete(process.env['HYGEN_CREATE_TMPLS'])
+        delete(process.env['HYGEN_TMPLS'])
+        process.chdir('/out')
+        add_and_generate()
+        expect(new AbsPath('/out/_templates/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        
+    })
+    test('path not set, no _templates dir in current dir', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
         
         delete(process.env['HYGEN_CREATE_TMPLS'])
-        expect(() => { add_and_generate()}).toThrow(/HYGEN_CREATE_TMPLS/)
+        delete(process.env['HYGEN_TMPLS'])
+        process.chdir('/out')
+        expect(() => { add_and_generate()}).toThrow(/_templates\) does not exist/)
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
         
     })

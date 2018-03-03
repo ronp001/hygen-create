@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased - target: 0.2.0]
+- change: if HYGEN_CREATE_TMPLS is not set, will look for template directory using HYGEN_TMPLS, then in _templates
 - add: option to specify whether generator will create a parent dir (`hygen-create setopt --gen-parent-dir|--no-parent-dir`)
 - change: the created generator will not include a parent dir by default
 - fix: HYGEN_CREATE_TMPLS can be relative

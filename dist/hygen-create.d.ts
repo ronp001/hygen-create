@@ -25,7 +25,7 @@ export declare namespace HygenCreateError {
         constructor();
     }
     class TargetPathNotSet extends HygenCreateError {
-        constructor();
+        constructor(reason: string);
     }
     class NoSuchPath extends HygenCreateError {
         constructor(file: string | null);
@@ -73,7 +73,12 @@ export declare class HygenCreate {
     private session_base_dir;
     private orig_session_json;
     loaded_session_version: Array<number> | null;
+    readonly targetDirWithInfo: {
+        using: string;
+        path: AbsPath;
+    };
     readonly targetDirForGenerators: AbsPath;
+    readonly targetDirForGeneratorsReason: string;
     readonly targetDirForGenerator: AbsPath;
     readonly fileCount: number;
     /**
