@@ -1,7 +1,18 @@
 language: node_js
 node_js:
-  - "7"
-  - "8"
+- '7'
+- '8'
 script:
-  - yarn test
-  - yarn test:integration
+- yarn build:production
+- yarn test
+- yarn test:integration
+deploy:
+  provider: npm
+  email: ronppub@gmail.com
+  api_key:
+    secure: k+DWwakXJwEpBkzRz3YAhFcTwh/Stp+R2iv0dryXwrkLXvN6OxkEtVKjIoku3cQaTtr+1KDlho2DDAHykm4atqP5Pp0QA6izNQ2dZU/524NJEg2LrtvsK84udmi8CvZlSuqmURJRWLnmUiMy3BKiDwYjs9A3ZXTDweqhhU0km58XUsxm6KfqIVL+nL1lUyj3D5C969bBDQ5ttaz3RHudGKxaxTKNEEHaqZDwY9HmsxQTQaFBOkXtm9SaDqa0Fixev9/hzo3XPSFq0g6MX2VqLnxGzy7/E3QO5keqw8CXvKp0Z1ii/dZqDbQt7KsDNC9I1QGmpiZq8ldN3q19qg1T0mjblo35sS6KOyUthpkz+7/mrN1JN4y57PhV8FEzLzM8O/pQdoC+cPfym75S4G0HyFSt7/RMn99WWyTWxxPC6v6cyZlyixcIIdHLKQM3HTJJSSzJ/mP6Nl3+iaxzoifSKZkpgP1uPnzFklHaUJ401CIYviDa9D3O+qJXJI3hFBT/XWlR8vfPNM0zcV794MpabkxB/QQ2FhEekyPAxbMP1hoZWOmSLMxUQyMo7yY+6hQ5mQDv/niWtSSTJEoEVHMwuO5uErCOM/7fioJ45eAP6U2eR7z/MyNZn+rRQ7iplknTsLzwToBM2CtZLwZOE24bCljD8dR5M0QI18aggnifsqI=
+  on:
+    tags: true
+    repo: ronp001/hygen-create
+    branch: master
+    skip_cleanup: true
