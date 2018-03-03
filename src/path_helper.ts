@@ -361,36 +361,16 @@ export class AbsPath {
         fs.renameSync(this.abspath, new_name)
     }
 
-    public renameToNextVer() {
+    public renameToNextVer() : string {
         let current_max_ver : number | null = this.maxVer
 
+        let newname : string
         if ( current_max_ver == null ) {
-            this.renameTo(this.abspath + ".1")
+            newname = this.abspath + ".1"
         } else {
-            this.renameTo(this.abspath + `.${current_max_ver + 1}`)
+            newname = this.abspath + `.${current_max_ver + 1}`
         }
-    }
-
-
-    public isIdenticalTo(other:string|AbsPath) : boolean {
-        if ( this.abspath == null ) return false
-        let other_ap = new AbsPath(other)
-        if ( other_ap.abspath == null ) return false
-       
-        let found_diff = false
-        other_ap.foreachEntryInDir((entry:AbsPath,traversal_direction:"down"|"up"|null) => {
-            let relpath = entry.relativeFrom(other_ap)
-            if ( relpath == null ) {
-                found_diff = true
-                return true
-            }
-            let local = this.add(relpath)
-            
-            if ( entry.isFile ) {
-                
-            }
-        })
-        
-        return !found_diff
+        this.renameTo(newname)
+        return newname
     }
 }

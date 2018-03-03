@@ -67,6 +67,5 @@ export declare class AbsPath {
     readonly existingVersions: number[] | null;
     readonly maxVer: number | null;
     renameTo(new_name: string): void;
-    renameToNextVer(): void;
-    isIdenticalTo(other: string | AbsPath): boolean;
+    renameToNextVer(): string;
 }

@@ -37,8 +37,8 @@ There are several steps to generating a generator:
 1. Start a hygen-create session: `hygen-create start <generator-name>`
 1. `hygen-create add <file> ...` to select files to be templatized for the generator.
 1. `hygen-create usename <name>` to indicate which word to replace with placeholders (of the <%= name %> family):  (Note: it's currently highly recommended to use a CamelCased value - see [limitations](#limitations))
-1. (optionally) `hygen-create status` to view information about replacements to be made
-1. [Specify](#target templates folder) the target ```hygen``` _templates folder
+1. (Optionally) `hygen-create status` to view information about replacements to be made
+1. (Optionally) [configure](#Configuration:-setting-target-_templates-directory) the target ```hygen``` _templates directory
 1. `hygen-create generate` to generate the new generator
 
 The result:  a new ```hygen``` generator will be created.  You can now use ```hygen <generator-name> new --name <target-name>``` to use your new generator.
@@ -305,8 +305,8 @@ When the `hygen generate` command executes, it checks if the generator directory
 If it does, and the newly created generator is different from the existing one, it will keep the existing generator but rename it by adding a version suffix.
 
 For example, the first time the command to create a generator called `mygen` is executed, the directory
-`<templates-path>/mygen` will be created.  The next time this command is run, `<templates-path>/mygen` will be renamed to `<templates-path>/mygen.1`, and a new `<templates-path>/mygen` will be created. 
-If the command is run again, `<templates-path>/mygen` will be renamed to `<templates-path>/mygen.2`, and so forth.
+`<templates-path>/mygen/new` will be created.  The next time this command is run, `<templates-path>/mygen/new` will be renamed to `<templates-path>/mygen/new.1`, and a new `<templates-path>/mygen/new` will be created. 
+If the command is run again, `<templates-path>/mygen/new` will be renamed to `<templates-path>/mygen.2`, and so forth.
 
 Note that a new version will not be created if the generator is identical to the previous one.
 

@@ -77,7 +77,9 @@ export class HygenCreate {
             if ( entry.value ) {
                 let ap = new AbsPath(entry.value)
                 if ( ap.isDir ) {
-                    return {using: `using ${entry.using} -- ${tried.join(",")}`, path: ap}
+                    let explain = tried.join(", ")
+                    if ( explain != "" ) explain = "(because " + explain + ")"
+                    return {using: `using ${entry.using} ${explain}`, path: ap}
                 } else if ( ap.exists ) {
                     tried.push(`${entry.using} (${entry.value}) exists but is not a directory`)
                 } else {
@@ -106,7 +108,13 @@ export class HygenCreate {
 
     public get fileCount() : number {
         if ( this.session == null ) return 0
-        return Object.keys(this.session.files_and_dirs).length
+        let result = 0
+        for ( let relpath in this.session.files_and_dirs) {
+            if(this.session.files_and_dirs[relpath] && this.fileAbsPathFromRelPath(relpath).exists) {
+                result++
+            }
+        }
+        return result
     }
 
     /**
@@ -476,17 +484,68 @@ export class HygenCreate {
         return result
     }
 
-    public generate() {
+    protected forEachGeneratedFile(fn:(rel_path: string, src_path:AbsPath, target_path:AbsPath) => boolean) {
+        if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
+        for ( let rel_path in this.session.files_and_dirs) {
+            if ( this.session.files_and_dirs[rel_path] ) {
+                let src_path = this.fileAbsPathFromRelPath(rel_path)
+                if ( src_path.isFile && !src_path.isBinaryFile) {
+                    let target_path = this.targetDirForGenerator.add(Templatizer.template_filename(rel_path))
+                    let abort = fn(rel_path, src_path, target_path)
+                    if ( abort ) return    
+                }
+            }
+        }                
+    }
+
+    protected isGeneratedSameAsExisting() : boolean {
+        let found_diff = false
+
+        // fail if the file count is not identical
+        let existing_files = this.targetDirForGenerator.dirContents
+        let num_existing_files = existing_files == null ? 0 : existing_files.length
+
+        if ( num_existing_files != this.fileCount ) return false
+
+        this.forEachGeneratedFile((rel_path:string, src_path:AbsPath, target_path:AbsPath) => {
+            if ( !target_path.isFile ) {
+                found_diff = true
+                return true
+            }
+
+            let existing_contents = target_path.contentsBuffer.toString()
+            let new_contents = this.getTemplateTextFor(rel_path)
+
+            if ( existing_contents != new_contents ) {
+                found_diff = true
+                return true
+            }
+
+            return false
+        })
+
+        return !found_diff
+    }
+
+    public generate(compare_to_previous:boolean=true) {
         if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         if ( this.fileCount == 0 ) throw new HygenCreateError.NothingToGenerate  
         if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet(this.targetDirForGeneratorsReason)
         
-        this.output("target path: ", this.targetDirForGenerators.toString())
         
-        if ( this.targetDirForGenerator.exists ) {
-            this.targetDirForGenerator.renameToNextVer()
+        if ( compare_to_previous && this.targetDirForGenerator.exists ) {
+            if ( !this.isGeneratedSameAsExisting() ) {
+                let newname = this.targetDirForGenerator.renameToNextVer()
+                this.output(chalk.red("previous version of generator renamed to", newname))
+                this.generate(false)
+            } else {
+                this.output(chalk.red("generator unchanged - not saving"))
+            }
+            return
         }
 
+        this.output("target path for new generator: ", this.targetDirForGenerators.toString())
+        
         for ( let file in this.session.files_and_dirs) {
             if ( this.session.files_and_dirs[file] ) {
                 this.generateTemplateForFile(file)
