@@ -2,6 +2,7 @@
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as _ from 'lodash'
 import {AbsPath} from "../path_helper"
 import {MockFSHelper} from "./mock-fs-helper"
 
@@ -34,7 +35,7 @@ let simfs = new MockFSHelper({
         '12file1' : "this is 12file1",
         '12file2' : "this is 12file2",
         'f' : "f in /dir1/dir12",
-    },
+    }
 })
 
 // Prepare path_helper.ts for inclusion in the mocked filesystem
@@ -259,3 +260,142 @@ test('mkdirs', () => {
     expect(()=>{p2.mkdirs()}).toThrow(/exists and is not a directory/)
 })
 
+test('maxver', () => {
+    let p = new AbsPath('/base/file1')
+    expect(p.existingVersions).toEqual([])
+    expect(p.maxVer).toEqual(null)
+    
+    new AbsPath('/base/file1.2').saveStrSync('old version')
+    expect(p.existingVersions).toEqual([2])
+    expect(p.maxVer).toEqual(2)
+    
+    new AbsPath('/base/file1.1').saveStrSync('old version')
+    expect(p.existingVersions).toEqual([1,2])
+    expect(p.maxVer).toEqual(2)
+    
+    new AbsPath('/base/file1.txt').saveStrSync('nothing to do with versions')
+    expect(p.maxVer).toEqual(2)
+    
+    new AbsPath('/base/file1.txt.1').saveStrSync('old version of other file')
+    expect(p.maxVer).toEqual(2)
+    
+    new AbsPath('/base/file1.1').rmFile()
+    expect(p.maxVer).toEqual(2)
+    expect(p.existingVersions).toEqual([2])
+    
+    new AbsPath('/base/file1.2').rmFile()
+    expect(new AbsPath('/base/file1.2').exists).toBeFalsy()
+    expect(p.existingVersions).toEqual([])
+    expect(p.maxVer).toEqual(null)
+})
+
+test('renameToNextVer', () => {
+    let p = new AbsPath('/base/file1')
+    expect(p.isFile).toBeTruthy()
+    expect(new AbsPath('/base/file1.1').isFile).toBeFalsy()
+    
+    p.renameToNextVer()
+    expect(p.maxVer).toEqual(null)
+    expect(p.isFile).toBeFalsy()
+    expect(new AbsPath('/base/file1.1').isFile).toBeTruthy()
+    
+    p.saveStrSync("new contents")
+    expect(p.isFile).toBeTruthy()
+    expect(new AbsPath('/base/file1.1').isFile).toBeTruthy()
+    expect(new AbsPath('/base/file1.2').isFile).toBeFalsy()
+    
+    p.renameToNextVer()
+    expect(new AbsPath('/base/file1').isFile).toBeFalsy()
+    expect(new AbsPath('/base/file1.1').isFile).toBeTruthy()
+    expect(new AbsPath('/base/file1.2').isFile).toBeTruthy()
+    expect(new AbsPath('/base/file1.2').contentsLines).toEqual(['new contents'])
+
+})
+
+describe('compare dirs', () => {
+    let fstruct = {
+        'f1' : 'f1 contents',
+        'd1' : {
+            'd1a' : 'd1a contents',
+            'd2' : {
+                'd2a' : 'd2a contents',
+                'symlink_to_f1': mockfs.symlink({ path: '/f1'}),              
+            }
+        }
+    }
+
+    test('identical dirs', () => {
+        let fs = {
+            'a1' : fstruct,
+            'a2' : fstruct
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeTruthy()
+    })
+
+    test('completely different dirs', () => {
+        let fs = {
+            'a1' : fstruct,
+            'a2' : {}
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeFalsy()
+    })
+
+    test('different file at the root', () => {
+        let fstruct2 = _.cloneDeep(fstruct)
+        fstruct2['f1'] = "modified contents"
+        let fs = {
+            'a1' : fstruct,
+            'a2' : fstruct2
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeFalsy()
+    })
+
+    test('different file inside a dir', () => {
+        let fstruct2 = _.cloneDeep(fstruct)
+        fstruct2['d1']['d2']['d2a'] = "modified contents"
+        let fs = {
+            'a1' : fstruct,
+            'a2' : fstruct2
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeFalsy()
+    })
+
+    test('missing file inside a dir', () => {
+        let fstruct2 = _.cloneDeep(fstruct)
+        delete(fstruct2['d1']['d2']['d2a'])
+        let fs = {
+            'a1' : fstruct,
+            'a2' : fstruct2
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeFalsy()
+    })
+
+    test('additional file inside a dir', () => {
+        let fstruct2 = _.cloneDeep(fstruct)
+        fstruct2['d1']['d2']['d2b'] = "a new file"
+        let fs = {
+            'a1' : fstruct,
+            'a2' : fstruct2
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeFalsy()
+    })
+
+    test('missing symlink', () => {
+        let fstruct2 = _.cloneDeep(fstruct)
+        delete(fstruct2['d1']['d2']['symlink_to_f1'])
+        let fs = {
+            'a1' : fstruct,
+            'a2' : fstruct2
+        }
+        mockfs(fs)
+        expect(new AbsPath('/a1').isIdenticalTo('/a2')).toBeFalsy()
+    })
+
+
+})

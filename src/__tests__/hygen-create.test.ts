@@ -23,7 +23,7 @@ beforeEach(async () => {
             'package.json' : '{"name":"any name"}'
         },
         '/newproj' : {
-            'just_a_file.txt' : 'nothing interesting here'
+            'just_a_file.txt' : 'nothing interesting here (name, another-name)'
         },
         '/not_a_project/subdir' : {
             'file1' : 'this is file1 (in not active)'
@@ -360,7 +360,7 @@ describe('gen_parent_dir', () => {
 })
 
 describe('generating', () => {
-    function add_and_generate() {
+    function add_and_generate(name:string='name') {
         let source_path = '/newproj'
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
@@ -373,16 +373,27 @@ describe('generating', () => {
             return
         }
         
-        hpg.useName('name')
-        hpg.generate(false)
+        hpg.useName(name)
+        hpg.generate()
     }
     test('using an absolute path', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
         
         process.env['HYGEN_CREATE_TMPLS'] = '/out'
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
-        add_and_generate()
+        expect(new AbsPath('/out/testgen.1/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+        add_and_generate('name')
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        expect(new AbsPath('/out/testgen.1/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+        add_and_generate('name')  // should not create new version because output is identical
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        expect(new AbsPath('/out/testgen/new.1/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+        add_and_generate('another-name') // should create new version of generator
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        expect(new AbsPath('/out/testgen/new.1/just_a_file.txt.ejs.t').isFile).toBeTruthy()
     })
 
     test('using a relative path', () => {

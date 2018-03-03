@@ -1,5 +1,6 @@
 import * as path from 'path'
 import * as fs from 'fs'
+import * as _ from 'lodash'
 var isBinaryFile = require("isbinaryfile")
 
 /**
@@ -281,19 +282,25 @@ export class AbsPath {
         return result
     }
 
-    public foreachEntryInDir(fn:(entry:AbsPath,traversal_direction:"down"|"up"|null) => void) {
+    public foreachEntryInDir(fn:(entry:AbsPath,traversal_direction:"down"|"up"|null) => boolean | void) : boolean {
         let entries = this.dirContents
-        if ( entries == null ) return
+        if ( entries == null ) return true
 
         for ( let entry of entries ) {
             if ( entry.isDir ) {
-                fn(entry, "down")
-                entry.foreachEntryInDir(fn)
-                fn(entry, "up")
+                let abort
+                abort = fn(entry, "down")
+                if ( abort ) return true
+                abort = entry.foreachEntryInDir(fn)
+                if ( abort ) return true
+                abort = fn(entry, "up")
+                if ( abort ) return true
             } else {
-                fn(entry, null)
+                let abort = fn(entry, null)
+                if ( abort ) return true
             }
         }
+        return false
     }
 
     public rmrfdir(must_match:RegExp, remove_self:boolean=false) {
@@ -318,5 +325,72 @@ export class AbsPath {
         if ( remove_self ) {
             fs.rmdirSync(this.abspath)
         }
+    }
+
+    public get existingVersions() : number[] | null {
+        if ( this.abspath == null ) return null
+        if ( !this.exists ) return null
+
+        let regex = new RegExp(`${this.abspath}\.([0-9]+)`)
+        let existing = this.parent.dirContents
+        let matching : Array<number|null> = _.map(existing, (el:AbsPath) => {
+            let matches = el.toString().match(regex)
+            if ( matches == null ) return null
+            return parseInt(matches[1])
+        })
+
+        let nums : number[] = _.filter(matching, (e) => {return e != null}) as number[]
+
+        return _.sortBy(nums)
+    }
+
+    public get maxVer() : number | null {
+        let existing_versions = this.existingVersions
+        if ( existing_versions == null ) return null
+
+        let max : number | undefined = _.max(existing_versions)
+
+        if ( max == undefined ) return null
+        return max
+    }
+
+    public renameTo(new_name:string) {
+        if ( this.abspath == null ) return
+        if ( !this.exists ) return
+        
+        fs.renameSync(this.abspath, new_name)
+    }
+
+    public renameToNextVer() {
+        let current_max_ver : number | null = this.maxVer
+
+        if ( current_max_ver == null ) {
+            this.renameTo(this.abspath + ".1")
+        } else {
+            this.renameTo(this.abspath + `.${current_max_ver + 1}`)
+        }
+    }
+
+
+    public isIdenticalTo(other:string|AbsPath) : boolean {
+        if ( this.abspath == null ) return false
+        let other_ap = new AbsPath(other)
+        if ( other_ap.abspath == null ) return false
+       
+        let found_diff = false
+        other_ap.foreachEntryInDir((entry:AbsPath,traversal_direction:"down"|"up"|null) => {
+            let relpath = entry.relativeFrom(other_ap)
+            if ( relpath == null ) {
+                found_diff = true
+                return true
+            }
+            let local = this.add(relpath)
+            
+            if ( entry.isFile ) {
+                
+            }
+        })
+        
+        return !found_diff
     }
 }

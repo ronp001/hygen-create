@@ -476,16 +476,20 @@ export class HygenCreate {
         return result
     }
 
-    public generate(force:boolean = false) {
+    public generate() {
         if ( this.session == null ) throw new HygenCreateError.NoSessionInProgress
         if ( this.fileCount == 0 ) throw new HygenCreateError.NothingToGenerate  
         if ( !this.targetDirForGenerator.isSet ) throw new HygenCreateError.TargetPathNotSet(this.targetDirForGeneratorsReason)
         
         this.output("target path: ", this.targetDirForGenerators.toString())
         
+        if ( this.targetDirForGenerator.exists ) {
+            this.targetDirForGenerator.renameToNextVer()
+        }
+
         for ( let file in this.session.files_and_dirs) {
             if ( this.session.files_and_dirs[file] ) {
-                this.generateTemplateForFile(file, force)
+                this.generateTemplateForFile(file)
             }
         }
     }

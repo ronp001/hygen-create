@@ -165,7 +165,7 @@ export declare class HygenCreate {
     paramInfo(param: string | null): string;
     fileAbsPathFromRelPath(relpath: string): AbsPath;
     getFileInfo(files: string[], verbose: boolean | undefined): Array<FileInfo>;
-    generate(force?: boolean): void;
+    generate(): void;
     generateTemplateForFile(relpath: string, force?: boolean): void;
     getTemplateTextFor(relpath: string): string;
 }

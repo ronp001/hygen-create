@@ -346,6 +346,6 @@ export default class HygenCreateCli extends CliApp {
     private generate(options:any) {
         let force : boolean = !!options.force
         // if ( force ) console.log("FORCE!")
-        this.hgc.generate(force)
+        this.hgc.generate()
     }
 }

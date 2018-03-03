@@ -299,7 +299,18 @@ to: dist/<%= name.toLowerCase() %>.js
 console.log("<%= h.capitalize(name) %>! <%= h.capitalize(name) %>!")
 ```
 
-## Configuration and Options
+## Previous versions of generators
+
+When the `hygen generate` command executes, it checks if the generator directory already exists.
+If it does, and the newly created generator is different from the existing one, it will keep the existing generator but rename it by adding a version suffix.
+
+For example, the first time the command to create a generator called `mygen` is executed, the directory
+`<templates-path>/mygen` will be created.  The next time this command is run, `<templates-path>/mygen` will be renamed to `<templates-path>/mygen.1`, and a new `<templates-path>/mygen` will be created. 
+If the command is run again, `<templates-path>/mygen` will be renamed to `<templates-path>/mygen.2`, and so forth.
+
+Note that a new version will not be created if the generator is identical to the previous one.
+
+## Configuration and options
 
 ### Configuration: setting target _templates directory
 
