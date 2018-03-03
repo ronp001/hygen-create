@@ -23,7 +23,7 @@ beforeEach(async () => {
             'package.json' : '{"name":"any name"}'
         },
         '/newproj' : {
-            'just_a_file.txt' : 'nothing interesting here'
+            'just_a_file.txt' : 'nothing interesting here (name, another-name)'
         },
         '/not_a_project/subdir' : {
             'file1' : 'this is file1 (in not active)'
@@ -38,7 +38,7 @@ beforeEach(async () => {
         },
         '/out' : {}
     }
-    simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.2.0", extra: 1, files_and_dirs: ['f1','f2','f3']})
+    simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.2.0", extra: 1, files_and_dirs: ['subdir/file1','subdir/file2','subdir/package.json']})
     simfs[`/active_project/${HygenCreate.default_session_file_name}.high_version`] = JSON.stringify({hygen_create_version: "100.0.0", extra: 1})
     
     simfs[`/project2/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.1.0"})
@@ -139,7 +139,7 @@ describe('loading and saving sessions', () => {
         if ( hpg.session == null ) {
             expect(hpg.session).not.toBeNull()
         } else {
-            expect(hpg.session.files_and_dirs).toEqual({'f1':true, 'f2':true, 'f3':true})
+            expect(hpg.session.files_and_dirs).toEqual({'subdir/file1':true, 'subdir/file2':true, 'subdir/package.json':true})
             expect(hpg.session.templatize_using_name).toBeNull()
         }
     })
@@ -219,12 +219,12 @@ describe('Adding files, directories and symlinks', () => {
         if ( hpg1.session == null ) {
             expect(hpg1.session).not.toBeNull()
         } else {
-            expect(hpg1.session.files_and_dirs).toEqual({'f1':true, 'f2':true, 'f3':true})
+            expect(hpg1.session.files_and_dirs).toEqual({'subdir/file1':true, 'subdir/file2':true, 'subdir/package.json':true})
             expect(hpg1.fileCount).toEqual(3)
-            expect(() => {hpg1.remove(['/active_project/f1'])}).not.toThrow()
+            expect(() => {hpg1.remove(['/active_project/subdir/file1'])}).not.toThrow()
             expect(hpg1.fileCount).toEqual(2)
-            expect(hpg1.session.files_and_dirs['f1']).toBeUndefined()
-            expect(hpg1.session.files_and_dirs['f2']).toBeTruthy()
+            expect(hpg1.session.files_and_dirs['subdir/file1']).toBeUndefined()
+            expect(hpg1.session.files_and_dirs['subdir/file2']).toBeTruthy()
         }
         hpg1.saveSessionIfActiveAndChanged()
 
@@ -234,8 +234,8 @@ describe('Adding files, directories and symlinks', () => {
         if ( hpg2.session == null ) {
             expect(hpg2.session).not.toBeNull()
         } else {
-            expect(hpg2.session.files_and_dirs['f1']).toBeUndefined()
-            expect(hpg2.session.files_and_dirs['f2']).toBeTruthy()
+            expect(hpg2.session.files_and_dirs['subdir/file1']).toBeUndefined()
+            expect(hpg2.session.files_and_dirs['subdir/file2']).toBeTruthy()
         }
     })
 })
@@ -360,7 +360,7 @@ describe('gen_parent_dir', () => {
 })
 
 describe('generating', () => {
-    function add_and_generate() {
+    function add_and_generate(name:string='name') {
         let source_path = '/newproj'
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
@@ -373,16 +373,27 @@ describe('generating', () => {
             return
         }
         
-        hpg.useName('name')
-        hpg.generate(false)
+        hpg.useName(name)
+        hpg.generate()
     }
     test('using an absolute path', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
         
         process.env['HYGEN_CREATE_TMPLS'] = '/out'
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
-        add_and_generate()
+        expect(new AbsPath('/out/testgen.1/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+        add_and_generate('name')
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        expect(new AbsPath('/out/testgen.1/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+        add_and_generate('name')  // should not create new version because output is identical
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        expect(new AbsPath('/out/testgen/new.1/just_a_file.txt.ejs.t').isFile).toBeFalsy()
+        
+        add_and_generate('another-name') // should create new version of generator
+        expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
+        expect(new AbsPath('/out/testgen/new.1/just_a_file.txt.ejs.t').isFile).toBeTruthy()
     })
 
     test('using a relative path', () => {

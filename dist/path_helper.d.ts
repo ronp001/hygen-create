@@ -62,6 +62,10 @@ export declare class AbsPath {
     unlinkFile(): void;
     rmFile(): void;
     readonly dirContents: Array<AbsPath> | null;
-    foreachEntryInDir(fn: (entry: AbsPath, traversal_direction: "down" | "up" | null) => void): void;
+    foreachEntryInDir(fn: (entry: AbsPath, traversal_direction: "down" | "up" | null) => boolean | void): boolean;
     rmrfdir(must_match: RegExp, remove_self?: boolean): void;
+    readonly existingVersions: number[] | null;
+    readonly maxVer: number | null;
+    renameTo(new_name: string): void;
+    renameToNextVer(): string;
 }

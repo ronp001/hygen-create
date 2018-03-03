@@ -13,7 +13,7 @@ Because creating templates from existing projects is annoying
 `hygen-create` takes a set of existing project files and uses them to create
 `hygen` template files, replacing a selected word with appropriate placeholders (such as <%= name.toLowerCase() %>, <%= h.inflection.camelize(name, true) %>, etc) entries.
 
-The resulting template files can be used as is (using the `hygen <generator> new` command - assuming [hygen](http://www.hygen.io) is installed), or they can be manually edited and changed as desired.
+Assuming [hygen](http://www.hygen.io) is installed, the resulting template files can be used as is (using the `hygen <generator> new` command).  They can also be manually edited and changed as desired before using `hygen` to run them.
 
 
 ## Installation
@@ -37,8 +37,8 @@ There are several steps to generating a generator:
 1. Start a hygen-create session: `hygen-create start <generator-name>`
 1. `hygen-create add <file> ...` to select files to be templatized for the generator.
 1. `hygen-create usename <name>` to indicate which word to replace with placeholders (of the <%= name %> family):  (Note: it's currently highly recommended to use a CamelCased value - see [limitations](#limitations))
-1. (optionally) `hygen-create status` to view information about replacements to be made
-1. [Specify](#target templates folder) the target ```hygen``` _templates folder
+1. (Optionally) `hygen-create status` to view information about replacements to be made
+1. (Optionally) [configure](#setting-target-templates-directory) the target ```hygen``` _templates directory
 1. `hygen-create generate` to generate the new generator
 
 The result:  a new ```hygen``` generator will be created.  You can now use ```hygen <generator-name> new --name <target-name>``` to use your new generator.
@@ -278,6 +278,9 @@ And run `hygen-create` again - although we'll want to change the name of the cre
 $ hygen-create rename greeter2
 ```
 
+(Note that if we do not manually change the name of the target generator, `hygen-create` will 
+[automatically rename](#previous-versions-of-generators) the previous version)
+
 Now we can run:
 ```
 $ hygen-create generate
@@ -299,16 +302,27 @@ to: dist/<%= name.toLowerCase() %>.js
 console.log("<%= h.capitalize(name) %>! <%= h.capitalize(name) %>!")
 ```
 
-## Configuration and Options
+## Previous versions of generators
 
-### Configuration: setting target _templates directory
+When the `hygen generate` command executes, it checks if the generator directory already exists.
+If it does, and the newly created generator is different from the existing one, it will keep the existing generator but rename it by adding a version suffix.
+
+For example, the first time the command to create a generator called `mygen` is executed, the directory
+`<templates-path>/mygen/new` will be created.  The next time this command is run, `<templates-path>/mygen/new` will be renamed to `<templates-path>/mygen/new.1`, and a new `<templates-path>/mygen/new` will be created. 
+If the command is run again, `<templates-path>/mygen/new` will be renamed to `<templates-path>/mygen.2`, and so forth.
+
+Note that a new version will not be created if the generator is identical to the previous one.
+
+## Configuration and options
+
+### Setting target templates directory
 
 `hygen-create` will look for a `hygen` _templates directory in the following order:
-1. env var `HYGEN_CREATE_TMPLS` if set and points to an existing directory
-1. env var `HYGEN__TMPLS` if set and points to an existing directory
-1. an existing `_templates` directory in the current dir
+1. The `HYGEN_CREATE_TMPLS` environment variable - if set and points to an existing directory
+1. The `HYGEN_TMPLS` environment variable - if set and points to an existing directory
+1. An existing `_templates` directory in the current dir
 
-`hygen-create` will not create a _templates directory, and will abort with an error if no such directory is found.
+Note that `hygen-create` will *not* create a _templates directory, and will abort with an error if no such directory is found.
 
 ### Option: parent directory generation
 

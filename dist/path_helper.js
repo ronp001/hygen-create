@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const fs = require("fs");
+const _ = require("lodash");
 var isBinaryFile = require("isbinaryfile");
 /**
  * An immutable path object with utility methods to navigate the filesystem, get information and perform
@@ -288,17 +289,27 @@ class AbsPath {
     foreachEntryInDir(fn) {
         let entries = this.dirContents;
         if (entries == null)
-            return;
+            return true;
         for (let entry of entries) {
             if (entry.isDir) {
-                fn(entry, "down");
-                entry.foreachEntryInDir(fn);
-                fn(entry, "up");
+                let abort;
+                abort = fn(entry, "down");
+                if (abort)
+                    return true;
+                abort = entry.foreachEntryInDir(fn);
+                if (abort)
+                    return true;
+                abort = fn(entry, "up");
+                if (abort)
+                    return true;
             }
             else {
-                fn(entry, null);
+                let abort = fn(entry, null);
+                if (abort)
+                    return true;
             }
         }
+        return false;
     }
     rmrfdir(must_match, remove_self = false) {
         if (this.abspath == null)
@@ -326,6 +337,50 @@ class AbsPath {
         if (remove_self) {
             fs.rmdirSync(this.abspath);
         }
+    }
+    get existingVersions() {
+        if (this.abspath == null)
+            return null;
+        if (!this.exists)
+            return null;
+        let regex = new RegExp(`${this.abspath}\.([0-9]+)`);
+        let existing = this.parent.dirContents;
+        let matching = _.map(existing, (el) => {
+            let matches = el.toString().match(regex);
+            if (matches == null)
+                return null;
+            return parseInt(matches[1]);
+        });
+        let nums = _.filter(matching, (e) => { return e != null; });
+        return _.sortBy(nums);
+    }
+    get maxVer() {
+        let existing_versions = this.existingVersions;
+        if (existing_versions == null)
+            return null;
+        let max = _.max(existing_versions);
+        if (max == undefined)
+            return null;
+        return max;
+    }
+    renameTo(new_name) {
+        if (this.abspath == null)
+            return;
+        if (!this.exists)
+            return;
+        fs.renameSync(this.abspath, new_name);
+    }
+    renameToNextVer() {
+        let current_max_ver = this.maxVer;
+        let newname;
+        if (current_max_ver == null) {
+            newname = this.abspath + ".1";
+        }
+        else {
+            newname = this.abspath + `.${current_max_ver + 1}`;
+        }
+        this.renameTo(newname);
+        return newname;
     }
 }
 exports.AbsPath = AbsPath;
