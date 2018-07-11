@@ -35,7 +35,7 @@ export default class HygenCreateCli extends CliApp {
 
         program
         .description('hygen-create - create hygen templates from an existing project')
-        .version('0.1.0')
+        .version('0.2.0')
         .option('-v, --verbose', "provide more info")
         .option('-p, --project <filename>', `name of session definitions file (default: ${HygenCreate.default_session_file_name})`)
 
@@ -248,7 +248,7 @@ export default class HygenCreateCli extends CliApp {
             console.log(chalk`\nUsing the string "{bold ${this.hgc.session.templatize_using_name}}" to templatize files (Change using 'hygen-create usename <name>')`)
         } else {
             console.log("")
-            console.log(chalk.redBright(`\nNo word set for templatizging files.  Set using 'hygen-create usename <name>'`))
+            console.log(chalk.redBright(`\nNo word set for templatizing files.  Set using 'hygen-create usename <name>'`))
             console.log("")
         }
 

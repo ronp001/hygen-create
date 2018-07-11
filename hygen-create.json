@@ -1,7 +1,7 @@
 {
   "about": "definitions for turning this project into a reusable template using hygen-create",
   "hygen_create_version": "0.2.0",
-  "name": "hyper",
+  "name": "app.cli",
   "files_and_dirs": {
     ".gitignore": true,
     "package.json": true,
