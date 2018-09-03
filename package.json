@@ -1,6 +1,6 @@
 {
   "name": "hygen-create",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [
     "hygen",
     "template-generator"
@@ -33,7 +33,7 @@
     "doc": "typedoc --out ./doc ./src"
   },
   "dependencies": {
-    "@ronp001/ts-utils": "^1.0.1",
+    "@ronp001/ts-utils": "^2.0.0",
     "chalk": "^2.3.1",
     "commander": "^2.14.1",
     "inflection": "^1.12.0",
