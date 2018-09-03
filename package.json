@@ -28,8 +28,8 @@
     "build": "tsc",
     "build:production": "yarn clean && tsc -p tsconfig-prod.json && yarn pack",
     "test:integration": "jest --testRegex 'src(/__(integration_)?tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$' 'src/__integration_tests__/integration.test.ts'",
-    "test": "npx jest",
-    "test:watch": "npx jest --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "doc": "typedoc --out ./doc ./src"
   },
   "dependencies": {
