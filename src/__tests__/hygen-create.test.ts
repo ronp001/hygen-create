@@ -1,8 +1,8 @@
 ///<reference types="jest"/>
-import {HygenCreate, HygenCreateError, HygenCreateSession} from "../hygen-create"
+import { HygenCreate, HygenCreateError, HygenCreateSession } from "../hygen-create"
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
-import { AbsPath } from "../path_helper";
+import { AbsPath, MockFSHelper } from "@ronp001/ts-utils"
 
 // Prepare hygen_create.ts for inclusion in the mocked filesystem
 // so that exceptions are displayed properly by jest
@@ -10,45 +10,48 @@ let path_to_hygen_create = __dirname + "/../hygen-create.ts"
 let hygen_create_contents = fs.readFileSync(path_to_hygen_create)
 
 beforeEach(async () => {
-    
+
     // Create an in-memory file system
-    
-    let simfs : {[key:string]: any} = {
+
+    let simfs: { [key: string]: any } = {
         '/test': {
             'note.md': 'hello world!'
         },
-        '/active_project/subdir' : {
-            'file1' : 'this is file1',
-            'file2' : 'this is file2',
-            'package.json' : '{"name":"any name"}'
+        '/active_project/subdir': {
+            'file1': 'this is file1',
+            'file2': 'this is file2',
+            'package.json': '{"name":"any name"}'
         },
-        '/newproj' : {
-            'just_a_file.txt' : 'nothing interesting here (name, another-name)'
+        '/newproj': {
+            'just_a_file.txt': 'nothing interesting here (name, another-name)'
         },
-        '/not_a_project/subdir' : {
-            'file1' : 'this is file1 (in not active)'
+        '/not_a_project/subdir': {
+            'file1': 'this is file1 (in not active)'
         },
-        '/project2' : {
-            'package.json' : JSON.stringify({name: 'pkg1'}),
-            'src' : {
-                'main.ts' : 'class Main\n{constructor(){\nconsole.log("This is main")\n}\n}'
+        '/project2': {
+            'package.json': JSON.stringify({ name: 'pkg1' }),
+            'src': {
+                'main.ts': 'class Main\n{constructor(){\nconsole.log("This is main")\n}\n}'
             },
-            'another_file' : 'just some text',
-            'dist' : {}
+            'another_file': 'just some text',
+            'dist': {}
         },
-        '/out' : {}
+        '/out': {}
     }
-    simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.2.0", extra: 1, files_and_dirs: ['subdir/file1','subdir/file2','subdir/package.json']})
-    simfs[`/active_project/${HygenCreate.default_session_file_name}.high_version`] = JSON.stringify({hygen_create_version: "100.0.0", extra: 1})
-    
-    simfs[`/project2/${HygenCreate.default_session_file_name}`] = JSON.stringify({hygen_create_version: "0.1.0"})
-    
+    simfs[`/active_project/${HygenCreate.default_session_file_name}`] = JSON.stringify({ hygen_create_version: "0.2.0", extra: 1, files_and_dirs: ['subdir/file1', 'subdir/file2', 'subdir/package.json'] })
+    simfs[`/active_project/${HygenCreate.default_session_file_name}.high_version`] = JSON.stringify({ hygen_create_version: "100.0.0", extra: 1 })
+
+    simfs[`/project2/${HygenCreate.default_session_file_name}`] = JSON.stringify({ hygen_create_version: "0.1.0" })
+
     // make sure exceptions are displayed properly by jest
     simfs[path_to_hygen_create] = hygen_create_contents
-    
+
+    const helper = new MockFSHelper(simfs)
+    helper.addDirContents(new AbsPath('./node_modules/callsites'))
+
     mockfs(simfs)
 })
-  
+
 afterEach(async () => {
     mockfs.restore()
 })
@@ -60,52 +63,52 @@ test('construction', () => {
 
 describe("loading sessions", () => {
     test('does not load session when loadOrCreateSession path is a directory hierarchy without a hygen-create session file', () => {
-    let hpg = new HygenCreate()
+        let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists('/')).toBeFalsy()
         expect(hpg.isSessionActive).toBeFalsy()
     })
-    
+
     test('loads session when loadOrCreateSession path is a directory with a hygen-create.json file', () => {
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists('/active_project')).toBeTruthy()
         expect(hpg.isSessionActive).toBeTruthy()
         expect((hpg.session as HygenCreateSession).extra).toEqual(1)
     })
-    
+
     test('loads session when loadOrCreateSession path is a directory inside a session hierarchy', () => {
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists('/active_project/subdir')).toBeTruthy()
         expect(hpg.isSessionActive).toBeTruthy()
         expect((hpg.session as HygenCreateSession).extra).toEqual(1)
-    
+
         expect(hpg.doesSessionNeedSaving).toBeFalsy()
     })
-    
+
     test('throws the correct exception when pointed to invalid session file', () => {
         let hpg = new HygenCreate()
-        expect(() => {hpg.setPathAndLoadSessionIfExists('/active_project/subdir/file1')}).toThrowError(HygenCreateError.CantParseSessionFile)
-        expect(() => {hpg.setPathAndLoadSessionIfExists('/active_project/subdir/package.json')}).toThrowError(HygenCreateError.InvalidSessionFile)
-        expect(() => {hpg.setPathAndLoadSessionIfExists('/active_project/subdir/nosuchfile')}).toThrowError(HygenCreateError.NoSuchPath)
-        expect(() => {hpg.setPathAndLoadSessionIfExists(`/active_project/${HygenCreate.default_session_file_name}.high_version`)}).toThrowError(HygenCreateError.InvalidSessionFileVersion)
-    })    
+        expect(() => { hpg.setPathAndLoadSessionIfExists('/active_project/subdir/file1') }).toThrowError(HygenCreateError.CantParseSessionFile)
+        expect(() => { hpg.setPathAndLoadSessionIfExists('/active_project/subdir/package.json') }).toThrowError(HygenCreateError.InvalidSessionFile)
+        expect(() => { hpg.setPathAndLoadSessionIfExists('/active_project/subdir/nosuchfile') }).toThrowError(HygenCreateError.NoSuchPath)
+        expect(() => { hpg.setPathAndLoadSessionIfExists(`/active_project/${HygenCreate.default_session_file_name}.high_version`) }).toThrowError(HygenCreateError.InvalidSessionFileVersion)
+    })
 })
 
 describe('Creating sessions', () => {
-    test('throws error if trying to create session without setting path first',() => {
+    test('throws error if trying to create session without setting path first', () => {
         let hpg = new HygenCreate()
-        expect(() => {hpg.startSession('test')}).toThrowError(HygenCreateError.TryingToStartSessionWithoutPath)
+        expect(() => { hpg.startSession('test') }).toThrowError(HygenCreateError.TryingToStartSessionWithoutPath)
     })
 
     test('starting a session twice', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/newproj')
         hpg.startSession('test')
-        expect(() => {hpg.startSession('test')}).toThrowError(HygenCreateError.SessionInProgress)
+        expect(() => { hpg.startSession('test') }).toThrowError(HygenCreateError.SessionInProgress)
         expect(hpg.isSessionActive).toBeTruthy()
     })
-    
 
-    test('creates saveable session',() => {
+
+    test('creates saveable session', () => {
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists('/newproj')).toBeFalsy()
         expect(hpg.saveSessionIfActiveAndChanged()).toBeFalsy()
@@ -114,7 +117,7 @@ describe('Creating sessions', () => {
         expect(hpg.isSessionActive).toBeTruthy()
         expect(hpg.doesSessionNeedSaving).toBeTruthy()
         expect(hpg.saveSessionIfActiveAndChanged()).toBeTruthy()
-    
+
         let contents = fs.readFileSync(`/newproj/${HygenCreate.default_session_file_name}`)
         let parsed = JSON.parse(contents.toString()) as HygenCreateSession
         expect(parsed.hygen_create_version).toEqual("0.2.0")
@@ -126,85 +129,85 @@ describe('loading and saving sessions', () => {
     test('loading previously saved version', () => {
         let hpg1 = new HygenCreate()
         expect(hpg1.setPathAndLoadSessionIfExists('/newproj')).toBeFalsy()
-        expect(() => {hpg1.startSession('test')}).not.toThrow()
+        expect(() => { hpg1.startSession('test') }).not.toThrow()
         expect(hpg1.saveSessionIfActiveAndChanged()).toBeTruthy()
-        
+
         let hpg2 = new HygenCreate()
-        expect(() => {hpg2.setPathAndLoadSessionIfExists('/newproj')}).not.toThrow()
+        expect(() => { hpg2.setPathAndLoadSessionIfExists('/newproj') }).not.toThrow()
     })
 
     test('loading a somewhat malformed session', () => {
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists('/active_project')).toBeTruthy()
-        if ( hpg.session == null ) {
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
-            expect(hpg.session.files_and_dirs).toEqual({'subdir/file1':true, 'subdir/file2':true, 'subdir/package.json':true})
+            expect(hpg.session.files_and_dirs).toEqual({ 'subdir/file1': true, 'subdir/file2': true, 'subdir/package.json': true })
             expect(hpg.session.templatize_using_name).toBeNull()
         }
     })
 
     test('does not overwite a non-session file', () => {
         let hpg = new HygenCreate()
-    
+
         let file1str = fs.readFileSync('/active_project/subdir/file1').toString()
         let pkgstr = fs.readFileSync('/active_project/subdir/package.json').toString()
-    
-        expect(() => {hpg.setPathAndLoadSessionIfExists('/active_project/subdir/file1')}).toThrowError(HygenCreateError.CantParseSessionFile)
-        expect(() => {hpg.startSession('test')}).toThrowError(HygenCreateError.TryingToStartSessionWithoutPath)
-        expect(() => {hpg.setPathAndLoadSessionIfExists('/active_project/subdir/package.json')}).toThrowError(HygenCreateError.InvalidSessionFile)
-        expect(() => {hpg.startSession('test')}).toThrowError(HygenCreateError.TryingToStartSessionWithoutPath)
+
+        expect(() => { hpg.setPathAndLoadSessionIfExists('/active_project/subdir/file1') }).toThrowError(HygenCreateError.CantParseSessionFile)
+        expect(() => { hpg.startSession('test') }).toThrowError(HygenCreateError.TryingToStartSessionWithoutPath)
+        expect(() => { hpg.setPathAndLoadSessionIfExists('/active_project/subdir/package.json') }).toThrowError(HygenCreateError.InvalidSessionFile)
+        expect(() => { hpg.startSession('test') }).toThrowError(HygenCreateError.TryingToStartSessionWithoutPath)
         expect(hpg.saveSessionIfActiveAndChanged()).toBeFalsy()
-    
+
         expect(fs.readFileSync('/active_project/subdir/file1').toString()).toEqual(file1str)
         expect(fs.readFileSync('/active_project/subdir/package.json').toString()).toEqual(pkgstr)
     })
-    
-    
+
+
     test('starting a session after stopping a session', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/newproj')
         let sessionpath = hpg.pathToCurrentSessionFile
-        
+
         hpg.startSession('test')
         expect(hpg.isSessionActive).toBeTruthy()
-        
+
         hpg.saveSessionIfActiveAndChanged()
         expect(sessionpath.isFile).toBeTruthy()  // session file should have been created
-        
+
         hpg.abort()
         expect(hpg.isSessionActive).toBeFalsy()
-        expect(() => {hpg.startSession('test')}).not.toThrow()
+        expect(() => { hpg.startSession('test') }).not.toThrow()
         expect(hpg.isSessionActive).toBeTruthy()
         expect(sessionpath.isFile).toBeFalsy()  // session file should have been deleted
-    })    
+    })
 })
 
 describe('Adding files, directories and symlinks', () => {
     test('adding files and dirs', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
-        
-        expect(() => {hpg.add(['/project2/package.json'])}).not.toThrow()
-        expect(() => {hpg.add(['/project2/src/main.ts'])}).not.toThrow()
-        expect(() => {hpg.add(['/project2/src/nosuchfile'])}).toThrow(HygenCreateError.FileNotFound)
-        expect(() => {hpg.add(['/project2/dist'])}).not.toThrow()
-        
-        if ( hpg.session == null ) {
+
+        expect(() => { hpg.add(['/project2/package.json']) }).not.toThrow()
+        expect(() => { hpg.add(['/project2/src/main.ts']) }).not.toThrow()
+        expect(() => { hpg.add(['/project2/src/nosuchfile']) }).toThrow(HygenCreateError.FileNotFound)
+        expect(() => { hpg.add(['/project2/dist']) }).not.toThrow()
+
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
             expect(hpg.session.files_and_dirs['package.json']).not.toBeUndefined()
             expect(hpg.session.files_and_dirs['src/main.ts']).not.toBeUndefined()
             expect(hpg.session.files_and_dirs['dist']).toBeUndefined()
         }
-        
+
         expect(hpg.doesSessionNeedSaving).toBeTruthy()
         expect(hpg.saveSessionIfActiveAndChanged()).toBeTruthy()
-        
+
         // now load in a different HygenCreate object
         let hpg2 = new HygenCreate()
         hpg2.setPathAndLoadSessionIfExists('/project2')
-        if ( hpg2.session == null ) {
+        if (hpg2.session == null) {
             expect(hpg2.session).not.toBeNull()
         } else {
             expect(hpg2.session.files_and_dirs['package.json']).not.toBeUndefined()
@@ -212,16 +215,16 @@ describe('Adding files, directories and symlinks', () => {
             expect(hpg2.session.files_and_dirs['dist']).toBeUndefined()
         }
     })
-    
+
     test('removing files/dirs', () => {
         let hpg1 = new HygenCreate()
         expect(hpg1.setPathAndLoadSessionIfExists('/active_project')).toBeTruthy()
-        if ( hpg1.session == null ) {
+        if (hpg1.session == null) {
             expect(hpg1.session).not.toBeNull()
         } else {
-            expect(hpg1.session.files_and_dirs).toEqual({'subdir/file1':true, 'subdir/file2':true, 'subdir/package.json':true})
+            expect(hpg1.session.files_and_dirs).toEqual({ 'subdir/file1': true, 'subdir/file2': true, 'subdir/package.json': true })
             expect(hpg1.fileCount).toEqual(3)
-            expect(() => {hpg1.remove(['/active_project/subdir/file1'])}).not.toThrow()
+            expect(() => { hpg1.remove(['/active_project/subdir/file1']) }).not.toThrow()
             expect(hpg1.fileCount).toEqual(2)
             expect(hpg1.session.files_and_dirs['subdir/file1']).toBeUndefined()
             expect(hpg1.session.files_and_dirs['subdir/file2']).toBeTruthy()
@@ -231,7 +234,7 @@ describe('Adding files, directories and symlinks', () => {
         // now load in a different HygenCreate object
         let hpg2 = new HygenCreate()
         hpg2.setPathAndLoadSessionIfExists('/active_project')
-        if ( hpg2.session == null ) {
+        if (hpg2.session == null) {
             expect(hpg2.session).not.toBeNull()
         } else {
             expect(hpg2.session.files_and_dirs['subdir/file1']).toBeUndefined()
@@ -244,15 +247,15 @@ describe('templatizations', () => {
     test('template for an included file when gen_parent_dir specified', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
-        
-        expect(() => {hpg.add(['/project2/package.json'])}).not.toThrow()
-        if ( hpg.session == null ) {
+
+        expect(() => { hpg.add(['/project2/package.json']) }).not.toThrow()
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
             hpg.useName('pkg1')
             hpg.session.gen_parent_dir = true
             let tpl = hpg.getTemplateTextFor('package.json').split('\n')
-            let l=0
+            let l = 0
             expect(tpl.length).toEqual(4)
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('to: <%= name %>/package.json')
@@ -263,15 +266,15 @@ describe('templatizations', () => {
     test('template for an included file when gen_parent_dir not specified', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
-        
-        expect(() => {hpg.add(['/project2/package.json'])}).not.toThrow()
-        if ( hpg.session == null ) {
+
+        expect(() => { hpg.add(['/project2/package.json']) }).not.toThrow()
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
             hpg.useName('pkg1')
             hpg.session.gen_parent_dir = false
             let tpl = hpg.getTemplateTextFor('package.json').split('\n')
-            let l=0
+            let l = 0
             expect(tpl.length).toEqual(4)
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('to: package.json')
@@ -282,14 +285,14 @@ describe('templatizations', () => {
     test('template for multiline file', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
-        
-        expect(() => {hpg.add(['/project2/src/main.ts'])}).not.toThrow()
-        if ( hpg.session == null ) {
+
+        expect(() => { hpg.add(['/project2/src/main.ts']) }).not.toThrow()
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
             hpg.useName('main')
             let tpl = hpg.getTemplateTextFor('src/main.ts').split('\n')
-            let l=0
+            let l = 0
             expect(tpl.length).toEqual(8)
             expect(tpl[l++]).toEqual('---')
             expect(tpl[l++]).toEqual('to: <%= name %>/src/<%= name.toLowerCase() %>.ts')
@@ -307,9 +310,9 @@ describe('additional tests', () => {
     test('adding entire directories', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
-        
-        expect(() => {hpg.add(['/project2'])}).not.toThrow()
-        if ( hpg.session == null ) {
+
+        expect(() => { hpg.add(['/project2']) }).not.toThrow()
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
             expect(hpg.session.files_and_dirs['package.json']).toBeTruthy()
@@ -317,27 +320,27 @@ describe('additional tests', () => {
             expect(hpg.session.files_and_dirs['hygen-create.json']).toBeTruthy() // the session file is included by default
             expect(hpg.session.files_and_dirs['src']).toBeUndefined()
             expect(hpg.session.files_and_dirs['dist']).toBeUndefined()
-            expect(hpg.fileCount).toEqual(3) 
+            expect(hpg.fileCount).toEqual(3)
         }
-        
+
     })
 
     test('get info', () => {
         let hpg = new HygenCreate();
         hpg.setPathAndLoadSessionIfExists('/project2')
-        
-        expect(() => {hpg.add(['/project2'])}).not.toThrow()
-        if ( hpg.session == null ) {
+
+        expect(() => { hpg.add(['/project2']) }).not.toThrow()
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
         } else {
-            let info = hpg.getFileInfo([],false)
+            let info = hpg.getFileInfo([], false)
             expect(info.length).toEqual(3)
             expect(info[0].path.toString()).toEqual("/project2/another_file")
             expect(info[1].path.toString()).toEqual("/project2/hygen-create.json") // this should have been created by the 'add' command
             expect(info[2].path.toString()).toEqual("/project2/package.json")
             expect(info[0].included).toBeTruthy()
             expect(info[1].included).toBeTruthy()
-        }        
+        }
     })
 })
 
@@ -345,14 +348,14 @@ describe('gen_parent_dir', () => {
     test('default value when loading 0.2.0 file', () => {
         let source_path = new AbsPath('/newproj')
         let hpg = new HygenCreate()
-        source_path.add('hygen-create.json').saveStrSync(JSON.stringify({hygen_create_version: '0.2.0'}))
+        source_path.add('hygen-create.json').saveStrSync(JSON.stringify({ hygen_create_version: '0.2.0' }))
         expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeTruthy()
-        expect(hpg.session.gen_parent_dir).toBeFalsy()        
+        expect(hpg.session.gen_parent_dir).toBeFalsy()
     })
     test('default value when loading 0.1.0 file', () => {
         let source_path = new AbsPath('/newproj')
         let hpg = new HygenCreate()
-        source_path.add('hygen-create.json').saveStrSync(JSON.stringify({hygen_create_version: '0.1.0'}))
+        source_path.add('hygen-create.json').saveStrSync(JSON.stringify({ hygen_create_version: '0.1.0' }))
         expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeTruthy()
         expect(hpg.session.gen_parent_dir).toBeTruthy()
     })
@@ -360,37 +363,37 @@ describe('gen_parent_dir', () => {
 })
 
 describe('generating', () => {
-    function add_and_generate(name:string='name') {
+    function add_and_generate(name: string = 'name') {
         let source_path = '/newproj'
         let hpg = new HygenCreate()
         expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
-        expect(() => {hpg.startSession('testgen')}).not.toThrow()
-    
-        expect(() => {hpg.add(['/newproj/just_a_file.txt'])}).not.toThrow()
-        
-        if ( hpg.session == null ) {
+        expect(() => { hpg.startSession('testgen') }).not.toThrow()
+
+        expect(() => { hpg.add(['/newproj/just_a_file.txt']) }).not.toThrow()
+
+        if (hpg.session == null) {
             expect(hpg.session).not.toBeNull()
             return
         }
-        
+
         hpg.useName(name)
         hpg.generate()
     }
     test('using an absolute path', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
-        
+
         process.env['HYGEN_CREATE_TMPLS'] = '/out'
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
         expect(new AbsPath('/out/testgen.1/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
-        
+
         add_and_generate('name')
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
         expect(new AbsPath('/out/testgen.1/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
-        
+
         add_and_generate('name')  // should not create new version because output is identical
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
         expect(new AbsPath('/out/testgen/new.1/just_a_file.txt.ejs.t').isFile).toBeFalsy()
-        
+
         add_and_generate('another-name') // should create new version of generator
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
         expect(new AbsPath('/out/testgen/new.1/just_a_file.txt.ejs.t').isFile).toBeTruthy()
@@ -398,7 +401,7 @@ describe('generating', () => {
 
     test('using a relative path', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
-        
+
         process.chdir('/test')
         process.env['HYGEN_CREATE_TMPLS'] = '../out'
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
@@ -408,9 +411,9 @@ describe('generating', () => {
 
     test('using a relative path with HYGEN_TMPLS', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
-        
+
         process.chdir('/test')
-        delete(process.env['HYGEN_CREATE_TMPLS'])
+        delete (process.env['HYGEN_CREATE_TMPLS'])
         process.env['HYGEN_TMPLS'] = '../out'
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
         add_and_generate()
@@ -422,22 +425,22 @@ describe('generating', () => {
         expect(new AbsPath('/out/_templates').isDir).toBeFalsy()
         new AbsPath('/out/_templates').mkdirs()
         expect(new AbsPath('/out/_templates').isDir).toBeTruthy()
-        
-        delete(process.env['HYGEN_CREATE_TMPLS'])
-        delete(process.env['HYGEN_TMPLS'])
+
+        delete (process.env['HYGEN_CREATE_TMPLS'])
+        delete (process.env['HYGEN_TMPLS'])
         process.chdir('/out')
         add_and_generate()
         expect(new AbsPath('/out/_templates/testgen/new/just_a_file.txt.ejs.t').isFile).toBeTruthy()
-        
+
     })
     test('path not set, no _templates dir in current dir', () => {
         expect(new AbsPath('/out').isDir).toBeTruthy()
-        
-        delete(process.env['HYGEN_CREATE_TMPLS'])
-        delete(process.env['HYGEN_TMPLS'])
+
+        delete (process.env['HYGEN_CREATE_TMPLS'])
+        delete (process.env['HYGEN_TMPLS'])
         process.chdir('/out')
-        expect(() => { add_and_generate()}).toThrow(/_templates\) does not exist/)
+        expect(() => { add_and_generate() }).toThrow(/_templates\) does not exist/)
         expect(new AbsPath('/out/testgen/new/just_a_file.txt.ejs.t').isFile).toBeFalsy()
-        
+
     })
 })

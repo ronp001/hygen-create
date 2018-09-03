@@ -1,9 +1,9 @@
 ///<reference types="jest"/>
-import {HygenCreate, HygenCreateError, HygenCreateSession} from "../hygen-create"
+import { HygenCreate, HygenCreateError, HygenCreateSession } from "../hygen-create"
 import * as mockfs from 'mock-fs'
 import * as fs from 'fs'
-import {AbsPath} from "../path_helper"
-import {Templatizer} from "../templatizer"
+import { AbsPath } from "@ronp001/ts-utils"
+import { Templatizer } from "../templatizer"
 
 // let runner = require('hygen')
 
@@ -12,20 +12,20 @@ let path_to_templates = path_to_output.add('_templates')
 let path_to_generated = path_to_output.add('generated')
 let examples_path = new AbsPath(__dirname).findUpwards('example', true)
 
-beforeAll(async () => {   
+beforeAll(async () => {
     process.env['HYGEN_CREATE_TMPLS'] = path_to_templates.toString()
     process.env['HYGEN_TMPLS'] = path_to_templates.toString()
 
     path_to_generated.rmrfdir(/\/example_output\/generated\//, false)
     path_to_templates.rmrfdir(/\/example_output\/_templates\//, false)
 })
-  
+
 afterAll(async () => {
     mockfs.restore()
 })
 
-async function runHygen(hygen_args: string[], template_path: AbsPath, output_path: AbsPath ) {
-    function log(...args:any[]) {
+async function runHygen(hygen_args: string[], template_path: AbsPath, output_path: AbsPath) {
+    function log(...args: any[]) {
         console.log(args)
     }
 
@@ -38,9 +38,9 @@ async function runHygen(hygen_args: string[], template_path: AbsPath, output_pat
         templates: template_path.toString(),
         cwd: output_path.toString(),
         debug: true,
-        exec: (action:any, body:any) => {
-          const opts = body && body.length > 0 ? { input: body } : {}
-          return require('execa').shell(action, opts)
+        exec: (action: any, body: any) => {
+            const opts = body && body.length > 0 ? { input: body } : {}
+            return require('execa').shell(action, opts)
         },
         // logger: new Logger(console.log.bind(console)),
         logger: new Logger(log),
@@ -49,29 +49,29 @@ async function runHygen(hygen_args: string[], template_path: AbsPath, output_pat
     await runner(hygen_args, config)
 }
 
-function runHygenGenerate(source_path:AbsPath, file_repaths:Array<string>, generator_name:string, usename: string, gen_parent_dir:boolean) {
+function runHygenGenerate(source_path: AbsPath, file_repaths: Array<string>, generator_name: string, usename: string, gen_parent_dir: boolean) {
     let hpg = new HygenCreate()
     hpg.session_file_name = 'example_session.json'
     expect(hpg.setPathAndLoadSessionIfExists(source_path.toString())).toBeFalsy()
-    expect(() => {hpg.startSession(generator_name)}).not.toThrow()
+    expect(() => { hpg.startSession(generator_name) }).not.toThrow()
 
-    let files_abspaths : Array<AbsPath> = []
-    for ( let file of file_repaths ) {
+    let files_abspaths: Array<AbsPath> = []
+    for (let file of file_repaths) {
         files_abspaths.push(source_path.add(file))
     }
 
-    expect(() => {hpg.add(files_abspaths)}).not.toThrow()
-    
-    if ( hpg.session == null ) {
+    expect(() => { hpg.add(files_abspaths) }).not.toThrow()
+
+    if (hpg.session == null) {
         expect(hpg.session).not.toBeNull()
         return
     }
-    
+
     hpg.useName(usename)
     hpg.setGenParentDir(gen_parent_dir)
     hpg.generate(false)
 
-    for ( let relpath of file_repaths ) {
+    for (let relpath of file_repaths) {
         let generated = path_to_templates.add(generator_name).add('new').add(Templatizer.template_filename(relpath))
         console.log("checking if generated: ", generated.toString())
         expect(generated.isFile).toBeTruthy()
@@ -131,26 +131,26 @@ test('section: doubled-with-sfx', async () => {
     await run_test_strings_file_comparison('doubled-with-sfx')
 })
 
-async function run_test_strings_file_comparison(section:string, gen_parent_dir:boolean = false) {
+async function run_test_strings_file_comparison(section: string, gen_parent_dir: boolean = false) {
     let test_strings_path = new AbsPath(__dirname).findUpwards('example', true).add('test_strings.json')
 
-    let parsed : any = test_strings_path.contentsFromJSON
-    if ( parsed == null ) {
+    let parsed: any = test_strings_path.contentsFromJSON
+    if (parsed == null) {
         console.log(`can't parse test_strings.json`)
         expect(parsed).not.toBeNull()
         return
     }
 
-    if ( parsed[section] == null ) {
+    if (parsed[section] == null) {
         console.log(`can't find section '${section}' in test_strings.json`)
         expect(parsed[section]).not.toBeNull()
-        return        
+        return
     }
 
-    let comparisons : {[key:string] : Array<string>} = parsed[section]['comparisons']
-    let defs :  {[key:string] : string} = parsed[section]['defs']
+    let comparisons: { [key: string]: Array<string> } = parsed[section]['comparisons']
+    let defs: { [key: string]: string } = parsed[section]['defs']
 
-    if ( comparisons == null || defs == null ) {
+    if (comparisons == null || defs == null) {
         expect(comparisons).not.toBeNull()
         expect(defs).not.toBeNull()
         return
@@ -158,7 +158,7 @@ async function run_test_strings_file_comparison(section:string, gen_parent_dir:b
 
     // create a generator using HygenCreate
     let generator_name = `test-generator-${section}`
-    if ( gen_parent_dir ) {
+    if (gen_parent_dir) {
         generator_name += "-with-parentdir"
     }
     let usename = defs["hygen-create usename"]
@@ -167,14 +167,14 @@ async function run_test_strings_file_comparison(section:string, gen_parent_dir:b
 
     // run the generator
     let subdir = section
-    if ( !gen_parent_dir ) {
+    if (!gen_parent_dir) {
         subdir += `-${hygen_name}`
     }
     await runHygen([generator_name, 'new', '--name', hygen_name], path_to_templates, path_to_generated.add(subdir))
 
     // load the resulting file
-    let generated_file : AbsPath 
-    if ( gen_parent_dir ) {
+    let generated_file: AbsPath
+    if (gen_parent_dir) {
         generated_file = path_to_generated.add(`${subdir}/${hygen_name}/test_strings.json`)
     } else {
         generated_file = path_to_generated.add(`${subdir}/test_strings.json`)
@@ -183,16 +183,16 @@ async function run_test_strings_file_comparison(section:string, gen_parent_dir:b
 
     // compare the generated strings to the expected strings
 
-    let generated_contents : any = generated_file.contentsFromJSON
-    let generated_comparisons : {[key:string] : Array<string>} = generated_contents[section]['comparisons']
+    let generated_contents: any = generated_file.contentsFromJSON
+    let generated_comparisons: { [key: string]: Array<string> } = generated_contents[section]['comparisons']
 
-    if ( generated_comparisons == null ) {
+    if (generated_comparisons == null) {
         console.log(`could not find comparisons in section ${section} of the generated file ${generated_file.toString()}`)
         expect(generated_comparisons).not.toBeNull()
     }
 
-    for ( let desc in generated_comparisons) {
-        expect(`${desc}: ` + generated_comparisons[desc][0]).toEqual(`${desc}: ` +generated_comparisons[desc][1])
+    for (let desc in generated_comparisons) {
+        expect(`${desc}: ` + generated_comparisons[desc][0]).toEqual(`${desc}: ` + generated_comparisons[desc][1])
     }
-    
+
 }

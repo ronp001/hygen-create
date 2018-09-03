@@ -28,11 +28,12 @@
     "build": "tsc",
     "build:production": "yarn clean && tsc -p tsconfig-prod.json && yarn pack",
     "test:integration": "jest --testRegex 'src(/__(integration_)?tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$' 'src/__integration_tests__/integration.test.ts'",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "npx jest",
+    "test:watch": "npx jest --watch",
     "doc": "typedoc --out ./doc ./src"
   },
   "dependencies": {
+    "@ronp001/ts-utils": "^1.0.1",
     "chalk": "^2.3.1",
     "commander": "^2.14.1",
     "inflection": "^1.12.0",
@@ -45,15 +46,18 @@
     "@types/lodash": "^4.14.104",
     "@types/mock-fs": "^3.6.30",
     "hygen": "^1.4.11",
-    "jest": "^22.3.0",
+    "jest": "^23.4.0",
     "mock-fs": "^4.4.2",
-    "ts-jest": "^22.0.4",
-    "typescript": "^2.7.2"
+    "ts-jest": "^23.1.0",
+    "typescript": "^3.0.3"
   },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(@---ronp001)/).*/"
+    ],
     "testRegex": "src(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
