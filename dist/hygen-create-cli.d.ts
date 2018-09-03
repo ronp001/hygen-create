@@ -4,13 +4,13 @@ export default class HygenCreateCli extends CliApp {
     protected beforeCommand(): void;
     protected afterCommand(): void;
     protected _init(): void;
-    private setopt(options);
-    private start(name, options);
-    private rename(name);
-    private add(fileOrDir, otherFilesOrDirs);
-    private remove(fileOrDir, otherFilesOrDirs);
-    private printTemplateInfo(tinfo);
-    private usename(name);
-    private show(fileOrDir, otherFilesOrDirs);
-    private generate(options);
+    private setopt;
+    private start;
+    private rename;
+    private add;
+    private remove;
+    private printTemplateInfo;
+    private usename;
+    private show;
+    private generate;
 }

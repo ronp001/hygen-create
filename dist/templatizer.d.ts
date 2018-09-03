@@ -1,4 +1,4 @@
-import { AbsPath } from './path_helper';
+import { AbsPath } from "@ronp001/ts-utils";
 export interface ReplacementInfo {
     linenum: number;
     old_text: string;

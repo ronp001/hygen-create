@@ -1,4 +1,4 @@
-import { AbsPath } from './path_helper';
+import { AbsPath } from "@ronp001/ts-utils";
 import { TemplateInfo } from './templatizer';
 export declare class HygenCreateError extends Error {
     msg: string;
@@ -90,7 +90,7 @@ export declare class HygenCreate {
     private _debug_on;
     readonly debugOn: boolean;
     activateDebug(): void;
-    private noOutput(...args);
+    private noOutput;
     private output;
     private debug;
     outputFunc: (...args: any[]) => void;

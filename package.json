@@ -1,6 +1,6 @@
 {
   "name": "hygen-create",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [
     "hygen",
     "template-generator"
@@ -33,6 +33,7 @@
     "doc": "typedoc --out ./doc ./src"
   },
   "dependencies": {
+    "@ronp001/ts-utils": "^2.0.0",
     "chalk": "^2.3.1",
     "commander": "^2.14.1",
     "inflection": "^1.12.0",
@@ -45,15 +46,18 @@
     "@types/lodash": "^4.14.104",
     "@types/mock-fs": "^3.6.30",
     "hygen": "^1.4.11",
-    "jest": "^22.3.0",
+    "jest": "^23.4.0",
     "mock-fs": "^4.4.2",
-    "ts-jest": "^22.0.4",
-    "typescript": "^2.7.2"
+    "ts-jest": "^23.1.0",
+    "typescript": "^3.0.3"
   },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(@---ronp001)/).*/"
+    ],
     "testRegex": "src(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
